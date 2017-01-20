@@ -17,6 +17,9 @@ class FunctionalTest(LiveServerTestCase):
         # load homepage
         self.browser.get(self.live_server_url)
         self.assertEqual(self.browser.title, 'Voong Finance')
+
+        # homepage shows a balance chart
+        self.browser.find_element_by_id('balance-chart')
         
         # # add transaction entry
         # form = self.browser.find_element_by_id('transaction-form')
