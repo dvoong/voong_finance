@@ -48,22 +48,17 @@
 	var mockCreateBalanceChart = sinon.mock();
 	var server = sinon.fakeServer.create();
 	vf.createBalanceChart = mockCreateBalanceChart;
-	server.respondWith("GET", vf.home.getBalanceUrl,
-			   [200,
-			    { "Content-Type": "application/json" },
-			    '[{ "id": 12, "comment": "Hey there" }]'
-			   ]);
+	data = [{ "id": 12, "comment": "Hey there" }]
+	server.respondWith("GET", vf.home.getBalanceUrl, [200, { "Content-Type": "application/json" }, JSON.stringify(data)]);
 
 	vf.home.initialise();
 	
 	assert.equal(mockCreateBalanceChart.called, false);
 	server.respond();
-	assert.equal(mockCreateBalanceChart.called, true);
+	assert.equal(mockCreateBalanceChart.calledOnce, true);
+	assert.equal(mockCreateBalanceChart.calledWith(data), true);
 
       });
-
-      // request data
-      // plotBalance
       
     </script>
   </body>

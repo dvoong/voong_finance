@@ -3,9 +3,9 @@ console.log("home.js");
 function initialise(){
     
     $.get(vf.home.getBalanceUrl, {})
-	.done(function(){
+	.done(function(data){
     	    console.log("done");
-    	    vf.createBalanceChart();
+    	    vf.createBalanceChart(data);
 	})
 	.fail(function(){
 	    console.log("failed");
