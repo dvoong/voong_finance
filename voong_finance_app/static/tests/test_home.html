@@ -17,9 +17,30 @@
     <script src="../../../static/tests/qunit.js"></script>
     <script src="../../../static/tests/sinon.js"></script>
     <script>
-      QUnit.test("initialise makes an ajax call to get the balance data", function(assert) {
-	
+
+      var xhr, requests, token='csrfmiddlewaretoken', url = 'get-balance';
+      QUnit.module("initialisation tests", {
+	beforeEach: function(){
+	  xhr = sinon.useFakeXMLHttpRequest();
+	  requests = [];
+	  xhr.onCreate = function(request) { requests.push(request); };
+	},
+	afterEach: function(){
+	  xhr.restore();
+	}
       });
+      
+      QUnit.test("initialise makes an ajax call to get the balance data", function(assert) {
+	vf.home.initialise();
+	assert.equal(requests.length, 1, 'check ajax request');
+	assert.equal(requests[0].method, 'GET', 'check http method');
+	assert.equal(requests[0].url, url + '?' + $.param({csrfmiddlewaretoken: token}), 'check url');
+      });
+
+      QUnit.test("");
+
+      // request data
+      // plotBalance
       
     </script>
   </body>
