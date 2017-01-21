@@ -10,6 +10,13 @@
     <div id="qunit"></div>
     <div id="qunit-fixture">
       <div id="balance-chart"></div>
+      <script>
+	var vf = {
+	  home: {
+	    getBalanceUrl: 'get-balance',
+	  }
+	}
+      </script>
     </div>
 
     <script src="http://code.jquery.com/jquery.min.js"></script>
@@ -18,7 +25,7 @@
     <script src="../../../static/tests/sinon.js"></script>
     <script>
 
-      var xhr, requests, token='csrfmiddlewaretoken', url = 'get-balance';
+      var xhr, requests, token='csrfmiddlewaretoken';
       QUnit.module("initialisation tests", {
 	beforeEach: function(){
 	  xhr = sinon.useFakeXMLHttpRequest();
@@ -34,10 +41,13 @@
 	vf.home.initialise();
 	assert.equal(requests.length, 1, 'check ajax request');
 	assert.equal(requests[0].method, 'GET', 'check http method');
-	assert.equal(requests[0].url, url + '?' + $.param({csrfmiddlewaretoken: token}), 'check url');
+	assert.equal(requests[0].url, vf.home.getBalanceUrl + '?' + $.param({csrfmiddlewaretoken: token}), 'check url');
       });
 
-      QUnit.test("");
+      QUnit.test("On successful response create balance chart", function(assert) {
+	vf.home.initialise();
+	
+      });
 
       // request data
       // plotBalance

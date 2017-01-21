@@ -2,15 +2,11 @@ console.log("home.js");
 
 function initialise(){
     console.log("initialise");
-    $.get(url, {
+    $.get(vf.home.getBalanceUrl, {
 	csrfmiddlewaretoken: token
     });
 };
 
-var vf = {
-    home: {
-	initialise: initialise
-    }
-};
+vf.home.initialise = initialise
 
 $.ready(vf.home.initialise);
