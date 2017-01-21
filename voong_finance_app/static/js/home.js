@@ -2,7 +2,7 @@ console.log("home.js");
 
 function initialise(){
     
-    $.get(vf.home.getBalanceUrl, {})
+    $.get(vf.getBalanceUrl, {})
 	.done(function(data){
     	    console.log("done");
     	    vf.createBalanceChart(data);
@@ -13,6 +13,8 @@ function initialise(){
     
 };
 
-vf.home.initialise = initialise;
+vf.home = {
+    initialise: initialise
+}
 
 $.ready(vf.home.initialise);

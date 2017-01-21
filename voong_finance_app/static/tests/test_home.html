@@ -10,17 +10,14 @@
     <div id="qunit"></div>
     <div id="qunit-fixture">
       <div id="balance-chart"></div>
+      <script src="http://code.jquery.com/jquery.min.js"></script>
+      <script src="../../../static/js/vf.js"></script>
+      <script src="../js/home.js"></script>
       <script>
-	var vf = {
-	  home: {
-	    getBalanceUrl: 'get-balance',
-	  }
-	}
+	vf.getBalanceUrl = 'get-balance'
       </script>
     </div>
 
-    <script src="http://code.jquery.com/jquery.min.js"></script>
-    <script src="../js/home.js"></script>
     <script src="../../../static/tests/qunit.js"></script>
     <script src="../../../static/tests/sinon.js"></script>
     <script>
@@ -41,7 +38,7 @@
 	vf.home.initialise();
 	assert.equal(requests.length, 1, 'check ajax request');
 	assert.equal(requests[0].method, 'GET', 'check http method');
-	assert.equal(requests[0].url, vf.home.getBalanceUrl, 'check url');
+	assert.equal(requests[0].url, vf.getBalanceUrl, 'check url');
       });
 
       QUnit.test("On successful response create balance chart", function(assert) {
@@ -49,7 +46,7 @@
 	var server = sinon.fakeServer.create();
 	vf.createBalanceChart = mockCreateBalanceChart;
 	data = [{ "id": 12, "comment": "Hey there" }]
-	server.respondWith("GET", vf.home.getBalanceUrl, [200, { "Content-Type": "application/json" }, JSON.stringify(data)]);
+	server.respondWith("GET", vf.getBalanceUrl, [200, { "Content-Type": "application/json" }, JSON.stringify(data)]);
 
 	vf.home.initialise();
 	
