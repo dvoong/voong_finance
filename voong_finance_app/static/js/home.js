@@ -4,7 +4,6 @@ function initialise(){
     
     $.get(vf.getBalanceUrl, {})
 	.done(function(data){
-    	    console.log("done");
     	    vf.createBalanceChart(data);
 	})
 	.fail(function(){

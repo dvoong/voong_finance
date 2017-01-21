@@ -56,6 +56,20 @@
 	assert.equal(mockCreateBalanceChart.calledWith(data), true);
 
       });
+
+      QUnit.module("createBalanceChart tests", {});
+
+      QUnit.test("Do some d3 things", function(assert){
+	var data = JSON.stringify({
+	  columns: ['date', 'balance'],
+	  data: [('2017-01-01', 10.),
+		 ('2017-01-02', 11.)],
+	});
+
+	vf.createBalanceChart(data);
+	
+	assert.equal(true, false);
+      });
       
     </script>
   </body>
