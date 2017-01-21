@@ -25,7 +25,7 @@
     <script src="../../../static/tests/sinon.js"></script>
     <script>
 
-      var xhr, requests, token='csrfmiddlewaretoken';
+      var xhr, requests;
       QUnit.module("initialisation tests", {
 	beforeEach: function(){
 	  xhr = sinon.useFakeXMLHttpRequest();
@@ -41,12 +41,25 @@
 	vf.home.initialise();
 	assert.equal(requests.length, 1, 'check ajax request');
 	assert.equal(requests[0].method, 'GET', 'check http method');
-	assert.equal(requests[0].url, vf.home.getBalanceUrl + '?' + $.param({csrfmiddlewaretoken: token}), 'check url');
+	assert.equal(requests[0].url, vf.home.getBalanceUrl, 'check url');
       });
 
       QUnit.test("On successful response create balance chart", function(assert) {
+	var mockCreateBalanceChart = sinon.mock();
+	var server = sinon.fakeServer.create();
+	vf.createBalanceChart = mockCreateBalanceChart;
+	server.respondWith("GET", vf.home.getBalanceUrl,
+			   [200,
+			    { "Content-Type": "application/json" },
+			    '[{ "id": 12, "comment": "Hey there" }]'
+			   ]);
+
 	vf.home.initialise();
 	
+	assert.equal(mockCreateBalanceChart.called, false);
+	server.respond();
+	assert.equal(mockCreateBalanceChart.called, true);
+
       });
 
       // request data
