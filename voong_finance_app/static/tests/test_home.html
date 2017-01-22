@@ -11,10 +11,12 @@
     <div id="qunit-fixture">
       <div id="balance-chart"></div>
       <script src="http://code.jquery.com/jquery.min.js"></script>
+      <script src="../../../static/js/d3.js"></script>
       <script src="../../../static/js/vf.js"></script>
       <script src="../js/home.js"></script>
       <script>
-	vf.getBalanceUrl = 'get-balance'
+	vf.getBalanceUrl = 'get-balance';
+	vf.balanceChartId = 'balance-chart';
       </script>
     </div>
 
@@ -41,34 +43,70 @@
 	assert.equal(requests[0].url, vf.getBalanceUrl, 'check url');
       });
 
-      QUnit.test("On successful response create balance chart", function(assert) {
-	var mockCreateBalanceChart = sinon.mock();
+      QUnit.test("On unsuccessful response create balance chart", function(assert) {
+	var mock_vf = sinon.mock(vf);
+	var exp = mock_vf.expects("createBalanceChart").never()
 	var server = sinon.fakeServer.create();
-	vf.createBalanceChart = mockCreateBalanceChart;
-	data = [{ "id": 12, "comment": "Hey there" }]
+	server.respondWith([403, {}, "unauthorised"]);
+
+	vf.home.initialise();
+
+	assert.equal(exp.verify(), true);
+	mock_vf.restore();
+      });
+
+      QUnit.test("On unsuccessful response create balance chart", function(assert) {
+	var mock_vf = sinon.mock(vf);
+	var exp = mock_vf.expects("createBalanceChart").once();
+	var data = [{ "id": 12, "comment": "Hey there" }]
+	var server = sinon.fakeServer.create();
 	server.respondWith("GET", vf.getBalanceUrl, [200, { "Content-Type": "application/json" }, JSON.stringify(data)]);
 
 	vf.home.initialise();
-	
-	assert.equal(mockCreateBalanceChart.called, false);
 	server.respond();
-	assert.equal(mockCreateBalanceChart.calledOnce, true);
-	assert.equal(mockCreateBalanceChart.calledWith(data), true);
+	
+	assert.equal(exp.verify(), true);
+	mock_vf.restore();
+      });
+
+      var mock_d3, data = {columns: ['date', 'balance'],
+			   data: [('2017-01-01', 10.),
+				  ('2017-01-02', 11.)],
+      };
+      QUnit.module("createBalanceChart tests", {
+	beforeEach: function(){
+	  mock_d3 = sinon.mock(d3);
+	},
+	afterEach: function(){
+	  mock_d3.restore();
+	}
+      });
+
+      QUnit.test("Do some d3 things", function(assert){
+	var spy = sinon.spy(d3, "select");
+
+	vf.createBalanceChart(data);
+
+	assert.equal(spy.callCount, 1);
+	assert.deepEqual(spy.firstCall.args, [vf.balanceChartId]);
+
+	spy.restore();
 
       });
 
-      QUnit.module("createBalanceChart tests", {});
-
-      QUnit.test("Do some d3 things", function(assert){
-	var data = JSON.stringify({
-	  columns: ['date', 'balance'],
-	  data: [('2017-01-01', 10.),
-		 ('2017-01-02', 11.)],
-	});
+      QUnit.test("Do some more d3 things", function(assert){
+	var x = {selectAll: function(y){}};
+	var stub = sinon.stub(d3, "select").returns(x);
+	var spy = sinon.spy(x, "selectAll");
 
 	vf.createBalanceChart(data);
-	
-	assert.equal(true, false);
+
+	assert.equal(spy.callCount, 1);
+	assert.deepEqual(spy.firstCall.args, ["p"]);
+
+	stub.restore();
+	spy.restore();
+
       });
       
     </script>
