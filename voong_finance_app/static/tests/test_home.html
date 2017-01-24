@@ -12,7 +12,7 @@
       <div id="balance-chart"></div>
       <script src="http://code.jquery.com/jquery.min.js"></script>
       <script src="../../../static/js/d3.js"></script>
-      <script src="../../../static/js/vf.js"></script>
+      <script src="../js/vf.js"></script>
       <script src="../js/home.js"></script>
       <script>
 	vf.getBalanceUrl = 'get-balance';
@@ -67,46 +67,6 @@
 	
 	assert.equal(exp.verify(), true);
 	mock_vf.restore();
-      });
-
-      var mock_d3, data = {columns: ['date', 'balance'],
-			   data: [('2017-01-01', 10.),
-				  ('2017-01-02', 11.)],
-      };
-      QUnit.module("createBalanceChart tests", {
-	beforeEach: function(){
-	  mock_d3 = sinon.mock(d3);
-	},
-	afterEach: function(){
-	  mock_d3.restore();
-	}
-      });
-
-      QUnit.test("Do some d3 things", function(assert){
-	var spy = sinon.spy(d3, "select");
-
-	vf.createBalanceChart(data);
-
-	assert.equal(spy.callCount, 1);
-	assert.deepEqual(spy.firstCall.args, [vf.balanceChartId]);
-
-	spy.restore();
-
-      });
-
-      QUnit.test("Do some more d3 things", function(assert){
-	var x = {selectAll: function(y){}};
-	var stub = sinon.stub(d3, "select").returns(x);
-	var spy = sinon.spy(x, "selectAll");
-
-	vf.createBalanceChart(data);
-
-	assert.equal(spy.callCount, 1);
-	assert.deepEqual(spy.firstCall.args, ["p"]);
-
-	stub.restore();
-	spy.restore();
-
       });
       
     </script>
