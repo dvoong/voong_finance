@@ -14,6 +14,7 @@
       <script src="../../../static/js/d3.js"></script>
       <script src="../js/vf.js"></script>
       <script src="../js/home.js"></script>
+      <script src="../js/balance-chart.js"></script>
       <script>
 	vf.getBalanceUrl = 'get-balance';
 	vf.balanceChartId = 'balance-chart';
@@ -55,7 +56,7 @@
 	mock_vf.restore();
       });
 
-      QUnit.test("On unsuccessful response create balance chart", function(assert) {
+      QUnit.test("On successful response create balance chart", function(assert) {
 	var mock_vf = sinon.mock(vf);
 	var exp = mock_vf.expects("createBalanceChart").once();
 	var data = [{ "id": 12, "comment": "Hey there" }]
