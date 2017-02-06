@@ -61,7 +61,9 @@ class FunctionalTest(LiveServerTestCase):
         # But it also seems appropriate to put it in unit tests for development reasons
         # To have it in both would involve duplication in code?
         # Should it be abstracted out of unit and functional tests?
-        # 
+        # How to get the functional test to run for a given date?
+        # Need to mock the today method in the datetime module?
+        self.assertEqual(1, 0, 'Finish functional tests')
 
         # homepage shows a balance chart
         self.browser.find_element_by_id('balance-chart')
