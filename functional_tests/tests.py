@@ -1,3 +1,5 @@
+# Unit tests tell a developer that the code is doing things right; functional tests tell a developer that the code is doing the right things.
+
 import datetime
 from django.test import TestCase
 
@@ -28,7 +30,7 @@ class FunctionalTest(LiveServerTestCase):
         self.browser.quit()
 
     def wait_for_element_with_id(self, element_id, timeout=DEFAULT_TIMEOUT):
-        wait_for_element_with_id(self.browser, element_id, timeout)
+        return wait_for_element_with_id(self.browser, element_id, timeout)
 
     def test_new_entry(self):
 
@@ -39,35 +41,23 @@ class FunctionalTest(LiveServerTestCase):
         # it's his first time to the site # TODO: sign in, sessions, welcome page, etc
         # he is invited to initialise his balance or to "do it later"
         initialise_balance = self.wait_for_element_with_id('balance-initialisation')
-        input_field = intialise_balance.find_element_by_id('input')
-        submit_button = intialise_balance.find_element_by_id('submit-button')
+        print(initialise_balance)
+        print(dir(initialise_balance))
+        input_field = initialise_balance.find_element_by_id('input')
+        submit_button = initialise_balance.find_element_by_id('submit-button')
 
         # he inputs his balance as 4344.40 GBP and hits ok/next/done button
         input_field.send_keys('4344.40')
-        # where to put in form validation stuff?
-        # e.g. he puts in a random string, stuff like that?
-        # in the javascript tests?
-        # nope, it  should be in the functional tests
-        # should all corner cases be put in the functional tests?
-        # or just 1, and then the rest in the unit tests?
-        # should be in the functional tests
-        # Unit tests tell a developer that the code is doing things right; functional tests tell a developer that the code is doing the right things.
+        # TODO: invalid input
 
         # He clicks the submit button
         submit_button.click()
 
+        # redirects to a new page?
+        # nah lets make it a single page app
+        
         # A blance chart appears at the top of the page
         balance_chart = self.wait_for_element_with_id('balance-chart')
-
-        # On the x axis is date
-        # the chart is centred around today's date
-        # David is viewing the website on his laptop, i.e. his window width is big* (TODO: be more specific)
-        # 15 days prior are shown on the left
-        # 15 days in the future are shown on the right
-        # today'date is highlighted or emphasised in some way
-        # the y axis show's the balance of their account
-        # the dates before today have the value 0 GBP
-        # the dates in the future all have the value of 4344.40 GBP
 
         # the initial balance prompt should have disappeared
         with self.assertRaises(NoSuchElementException):
