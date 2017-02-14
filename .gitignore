@@ -3,4 +3,4 @@ chromedriver
 *~
 #*
 *.pyc
-virtualenv
+virtualenv_python3
