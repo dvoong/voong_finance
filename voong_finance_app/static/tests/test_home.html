@@ -10,6 +10,12 @@
     <div id="qunit"></div>
     <div id="qunit-fixture">
       <div id="balance-chart"></div>
+      <div id='balance-initialisation'>
+	<form onsubmit='return false;'>
+	  <input id='input'>
+	  <input id='submit-button' type='submit'>
+	</form>
+      </div>
       <script src="http://code.jquery.com/jquery.min.js"></script>
       <script src="../../../static/js/d3.js"></script>
       <script src="../js/vf.js"></script>
@@ -71,6 +77,10 @@
       });
 
       QUnit.test("Submitting initial balance removes/hides the initial balance div", function(assert) {
+	var input = balance_initialisation.input
+	var submit = balance_initialisation.submit_button
+	input.val(4344.40);
+	submit.click();
 	assert.equal(true, false, "TODO");
       });
       
