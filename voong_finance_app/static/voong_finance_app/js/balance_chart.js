@@ -1,12 +1,22 @@
 console.log("balance-chart.js");
 
-function createBalanceChart(data){
-    console.log("createBalanceChart");
-    // var balanceChart = new BalanceChart();
-    // balanceChart.create(data);
+var balance_chart = {
+
+    BalanceChart: function (div_id, data){
+	console.log('call BalanceChart');
+    },
+
+    div_id: 'balance-chart',
+    
 };
 
-vf.createBalanceChart = createBalanceChart;
+// function createBalanceChart(data){
+//     console.log("createBalanceChart");
+//     // var balanceChart = new BalanceChart();
+//     // balanceChart.create(data);
+// };
+
+// vf.createBalanceChart = createBalanceChart;
 
 // function BalanceChart(){
 //     var that = this;
