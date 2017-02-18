@@ -7,7 +7,8 @@ from django.test import TestCase
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import NoSuchElementException
-    
+from selenium.webdriver.support.ui import Select
+
 from django.test import LiveServerTestCase
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 
@@ -36,7 +37,8 @@ class FunctionalTest(StaticLiveServerTestCase):
         return wait_for_element_with_id(self.browser, element_id, timeout)
 
     def test_new_entry(self):
-
+        INITIAL_BALANCE = 4344.40
+        
         # david loads the homepage
         self.browser.get(self.live_server_url)
         self.assertEqual(self.browser.title, 'Voong Finance')
@@ -48,7 +50,7 @@ class FunctionalTest(StaticLiveServerTestCase):
         submit_button = initialise_balance.find_element_by_id('submit-button')
 
         # he inputs his balance as 4344.40 GBP and hits ok/next/done button
-        input_field.send_keys('4344.40')
+        input_field.send_keys(str(INITIAL_BALANCE))
         # TODO: test invalid inputs
 
         # He clicks the submit button
@@ -56,6 +58,23 @@ class FunctionalTest(StaticLiveServerTestCase):
 
         # A blance chart appears at the top of the page
         balance_chart = self.wait_for_element_with_id('balance-chart')
+
+        # The balance chart shows
+        # x axis: date
+        x_axis = balance_chart.find_element_by_id('x-axis')
+        self.assertEqual(get_axis_title(x_axis), 'Date')
+        # y axis: balance
+        y_axis = balance_chart.find_element_by_id('y-axis')
+        self.assertEqual(get_axis_title(y_axis), 'Balance')
+        # today centered on the x axis
+        dates = get_dates(balance_chart)
+        self.assertEqual(len(dates), 43)
+        # today's balance at 4334.40
+        self.assertEqual(get_balance(dates[21], balance_chart), INITIAL_BALANCE)
+        # three weeks ahead
+        dates[42] = today + datetime.timedelta(days=21)
+        # three weeks behind
+        dates[0] = today - datetime.timedelta(days=21)
 
         # the initial balance prompt should have disappeared
         with self.assertRaises(NoSuchElementException):
@@ -85,17 +104,34 @@ class FunctionalTest(StaticLiveServerTestCase):
     
         # david sets transaction type to expense
         transaction_type_dropdown = transaction_form.find_element_by_id('transaction-type-dropdown')
-
+        Select(transaction_type_dropdown).select_by_visible_text('Expense')
+        
         # david types name as phone bill
         transaction_description = transaction_form.find_element_by_id('transaction-description')
         transaction_description.send_keys('Phone Bill')
         
         # david sets the date to next week
+        date_selector = transaction_form.find_element_by_id('date-selector')
+        date_selector.send_keys((self.today + datetime.timedelta(days=7)).isoformat())
+        
         # david ticks the "transaction repeats" checkbox
+        repeating_transaction_checkbox = transaction_form.find_element_by_id('repeating-transaction-checkbox')
+        repeating_transaction_checkbox.click()
+        
         # david selects "repeats monthly"
+        repeat_frequency_dropdown = transaction_form.find_element_by_id('repeat-frequency-dropdown')
+        Select(repeat_frequency_dropdown).select_by_visible_text('Monthly')
+        
         # david enters the amount as 15 GBP
+        transaction_size_input = transaction_form.find_element_by_id('transaction-size-input')
+        transaction_size_input.send_keys(15) #TODO: input validation
+        
         # david clicks the create transaction button
+        create_transaction_btn = transaction_form.find_element_by_id('create-transaction-btn')
+        create_transaction_btn.click()
+        
         # The balance chart updates
+        
         # next week shows the balance as 4329.40, this is true for dates following it also
         # the dates between today and next week show the original balance (inclusive of today, exclusive of next week)
         # the calendar view also shows a new entry on the date for next week
