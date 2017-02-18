@@ -9,6 +9,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import NoSuchElementException
     
 from django.test import LiveServerTestCase
+from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 
 DEFAULT_TIMEOUT = 1
 
@@ -20,10 +21,12 @@ def wait_for_element_with_id(browser, element_id, timeout=DEFAULT_TIMEOUT):
         )
     )
 
-class FunctionalTest(LiveServerTestCase):
+#class FunctionalTest(LiveServerTestCase):
+class FunctionalTest(StaticLiveServerTestCase):
 
     def setUp(self):
         self.browser = webdriver.Chrome()
+        # self.browser = webdriver.Firefox()
         self.today = datetime.date(2017, 1, 24)
         
     def tearDown(self):
@@ -41,21 +44,16 @@ class FunctionalTest(LiveServerTestCase):
         # it's his first time to the site # TODO: sign in, sessions, welcome page, etc
         # he is invited to initialise his balance or to "do it later"
         initialise_balance = self.wait_for_element_with_id('balance-initialisation')
-        print(initialise_balance)
-        print(dir(initialise_balance))
         input_field = initialise_balance.find_element_by_id('input')
         submit_button = initialise_balance.find_element_by_id('submit-button')
 
         # he inputs his balance as 4344.40 GBP and hits ok/next/done button
         input_field.send_keys('4344.40')
-        # TODO: invalid input
+        # TODO: test invalid inputs
 
         # He clicks the submit button
         submit_button.click()
 
-        # redirects to a new page?
-        # nah lets make it a single page app
-        
         # A blance chart appears at the top of the page
         balance_chart = self.wait_for_element_with_id('balance-chart')
 
@@ -64,15 +62,34 @@ class FunctionalTest(LiveServerTestCase):
             self.browser.find_element_by_id('balance-initialisation')
 
         # a navbar appears at the top
-        # the navbar contains a logo which presumably takes the user back to the homepage
+        navbar = self.browser.find_element_by_id('navbar')
+        
+        # the navbar contains a logo which presumably takes the user back to the homepage TODO: test for the logo
+        logo = navbar.find_element_by_id('logo')
+        
         # the navbar contains a 'create transaction' button
+        create_transaction_btn = navbar.find_element_by_id('create-transaction-btn')
+        
         # the navbar contains other typical navigation buttons
+        # TODO: other navbar things, e.g. contact, settings/profile, transaction_history maybe
+        
         # a calendar view appears below the chart
+        calendar = self.browser.find_element_by_id('calendar')
+        
         # he is now invited to create his first entry
         # perhaps a popup appears over a highlighted transaction button or the rest of the page is dimmed
+        first_entry_prompt = self.browser.find_element_by_id('first-entry-prompt')
+
         # a transaction form appears
+        transaction_form = first_entry_prompt.find_element_by_id('transaction-form')
+    
         # david sets transaction type to expense
+        transaction_type_dropdown = transaction_form.find_element_by_id('transaction-type-dropdown')
+
         # david types name as phone bill
+        transaction_description = transaction_form.find_element_by_id('transaction-description')
+        transaction_description.send_keys('Phone Bill')
+        
         # david sets the date to next week
         # david ticks the "transaction repeats" checkbox
         # david selects "repeats monthly"
@@ -98,18 +115,17 @@ class FunctionalTest(LiveServerTestCase):
         # problem: cannot mock the datetime module for the server, it's in a different python process
         self.assertEqual(1, 0, 'Finish functional tests')
 
-
-        # OLD STUFF
-        # homepage shows a balance chart
-        self.browser.find_element_by_id('balance-chart')
+    #     # OLD STUFF
+    #     # homepage shows a balance chart
+    #     self.browser.find_element_by_id('balance-chart')
         
-        # # add transaction entry
-        # form = self.browser.find_element_by_id('transaction-form')
-        # date_input = form.find_element_by_name('date')
-        # transaction_input = form.find_element_by_name('transaction')
-        # description_input = form.find_element_by_name('description')
-        # submit = form.find_element_by_css_selector('input[type="submit"]')
+    #     # # add transaction entry
+    #     # form = self.browser.find_element_by_id('transaction-form')
+    #     # date_input = form.find_element_by_name('date')
+    #     # transaction_input = form.find_element_by_name('transaction')
+    #     # description_input = form.find_element_by_name('description')
+    #     # submit = form.find_element_by_css_selector('input[type="submit"]')
         
-        # date_input.send_keys('2016-08-01')
-        # transaction_input.send_keys('150')
-        # description_input.send_keys('Bank pays dividends')
+    #     # date_input.send_keys('2016-08-01')
+    #     # transaction_input.send_keys('150')
+    #     # description_input.send_keys('Bank pays dividends')
