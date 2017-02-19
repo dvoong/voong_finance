@@ -18,6 +18,7 @@ var balance_initialisation = {
     initialise_balance_url: '/api/initialise-balance',
 
     success_callback: function(data){
+	console.log('success callback');
 	return balance_chart.BalanceChart(balance_chart.div_id, data);
     }
     

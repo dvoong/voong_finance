@@ -20,10 +20,10 @@ QUnit.test('Submission of the form makes an ajax call to the initialise_balance 
     this.balance_initialisation.submit.click();
     assert.ok(stub.calledOnce);
     assert.ok(stub.calledWith(url, data, callback));
+    stub.restore();
 });
 
 QUnit.test('Upon successful submission of the form hide/delete the balance_initialisation  div', function(assert){
-    // mock a ajax response
     assert.ok($('#balance-initialisation').length == 1, "found balance-initialisation div");
     this.server.respondWith("POST",
 			    this.balance_initialisation.initialise_balance_url,
@@ -36,9 +36,7 @@ QUnit.test('Upon successful submission of the form hide/delete the balance_initi
 });
 
 QUnit.test('Upon successful submission of the form call create_balance_chart', function(assert){
-
     var spy = sinon.spy(balance_chart, 'BalanceChart');
-    console.log(spy)
     var data = {date: ['2017-01-24', '2017-01-25'], balance: [10, 10]}
     this.server.respondWith("POST",
 			    this.balance_initialisation.initialise_balance_url,
@@ -46,7 +44,6 @@ QUnit.test('Upon successful submission of the form call create_balance_chart', f
 			   );
     this.balance_initialisation.submit.click();
     this.server.respond();
-    console.log(spy.callCount);
     assert.ok(spy.calledOnce, 'BalanceChart not called');
     assert.ok(spy.calledWith(balance_chart.div_id, data), 'BalanceChart not called with args');
 });
