@@ -17,25 +17,26 @@ QUnit.module("createBalanceChart tests", {
 QUnit.test('Pad dates', function(assert){
 
     var data = this.data;
-    var start = new Date(2016, 12, 31);
-    var end = new Date(2017, 1, 4);
-
-    console.log(data);
+    var start = new Date(2016, 11, 31);
+    var end = new Date(2017, 0, 4);
+    var get_balance = sinon.stub(balance_chart, 'get_balance');
+    get_balance.onCall(0).returns(10);
+    get_balance.onCall(1).returns(11);
     
     padded_data = balance_chart.pad_dates(data, start, end);
 
     expected = {
 	columns: ['date', 'balance'],
 	values: [
-	    ('2016-12-31', 0),
-	    ('2017-01-01', 10),
-	    ('2017-01-02', 11),
-	    ('2017-01-03', 11),
-	    ('2017-01-04', 11)
+	    ['2016-12-31', 0],
+	    ['2017-01-01', 10],
+	    ['2017-01-02', 11],
+	    ['2017-01-03', 11],
+	    ['2017-01-04', 11]
 	]
     }
     
-    assert.equal(padded_data, expected)
+    assert.deepEqual(padded_data, expected)
     
 });
 

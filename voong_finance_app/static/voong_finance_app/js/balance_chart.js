@@ -47,24 +47,26 @@ var balance_chart = {
     pad_dates: function(data, start, end){
 	var first_date = new Date(data.values[0][0]);
 	var last_date = new Date(data.values[data.values.length-1][0])
-	console.log(data);
-	console.log(data.values[0]);
-	console.log(first_date);
-	console.log(last_date);
 	var balance = 0;
 	var padded_data = {
 	    columns: data.columns,
 	    values: []
-	};;
+	};
+
 	for(var i=0; i<=(end - start) / (3600000 * 24); i++){
-	    var date = new Date(start + (i * 3600000 * 24));
+	    var date = new Date(start);
+	    date.setDate(date.getDate() + i);
 	    var date_string = date.toISOString().split('T')[0];
-	    console.log(date);
-	    if(date >= first_date || date <= last_date)
+
+	    if(date >= first_date && date <= last_date){
 		balance = balance_chart.get_balance(date_string);
-	    padded_data.values.push((date_string, balance));
+	    }
+	    padded_data.values.push([date_string, balance]);
 	}
 	return padded_data;
+    },
+
+    get_balance: function(date, data){
     }
     
 };
