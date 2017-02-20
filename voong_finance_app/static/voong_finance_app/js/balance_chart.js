@@ -4,9 +4,68 @@ var balance_chart = {
 
     BalanceChart: function (div_id, data){
 	console.log('call BalanceChart');
+	console.log('data:');
+	console.log(data);
+	
+	var that = this;
+	this.div_id = div_id;
+	this.data = data;
+	this.margin = {top: 20, right: 20, bottom: 70, left: 40};
+	this.width = 600 - this.margin.left - this.margin.right;
+	this.height = 300 - this.margin.top - this.margin.bottom;
+	this.x = d3.scaleOrdinal()//.range([0, this.width]); // should be an array of the somethings
+	this.y = d3.scaleLinear().range([this.height, 0]);
+
+	this.svg = d3.select('#' + this.div_id)
+	    .append('svg')
+	    .attr('width', this.width + this.margin.left + this.margin.right)
+	    .attr('height', this.height + this.margin.top + this.margin.bottom)
+	    .append('g')
+	    .attr('transform', 'translate(' + this.margin.left + ',' + this.margin.top + ')');
+
+	var columns = data.columns;
+	var values = data.values;
+	var date_index = columns.indexOf('date');
+	var balance_index = columns.indexOf('balance');
+	
+	this.x.domain([0, values.length]); // .map(function(d) { return d[date_index]; }));
+	this.y.domain([0, d3.max(values, function(d) { return d[balance_index]; })]);
+	
+	this.svg.selectAll(".bar")
+	    .data(vals)
+	    .enter().append("rect")
+	    .attr("class", "bar")
+	    .attr("x", function(d) { return that.x(d[date_index]); })
+	    .attr("width", this.x.bandwidth())
+	    .attr("y", function(d) { return that.y(d[balance_chart]); })
+	    .attr("height", function(d) { return that.height - that.y(d[balance_index]); });
+
     },
 
     div_id: 'balance-chart',
+
+    pad_dates: function(data, start, end){
+	var first_date = new Date(data.values[0][0]);
+	var last_date = new Date(data.values[data.values.length-1][0])
+	console.log(data);
+	console.log(data.values[0]);
+	console.log(first_date);
+	console.log(last_date);
+	var balance = 0;
+	var padded_data = {
+	    columns: data.columns,
+	    values: []
+	};;
+	for(var i=0; i<=(end - start) / (3600000 * 24); i++){
+	    var date = new Date(start + (i * 3600000 * 24));
+	    var date_string = date.toISOString().split('T')[0];
+	    console.log(date);
+	    if(date >= first_date || date <= last_date)
+		balance = balance_chart.get_balance(date_string);
+	    padded_data.values.push((date_string, balance));
+	}
+	return padded_data;
+    }
     
 };
 
