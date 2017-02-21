@@ -21,5 +21,6 @@ from voong_finance_app.views import home
 urlpatterns = [
     url(r'^$', home),
     url(r'^app/', include('voong_finance_app.urls')),
+    url(r'^api/', include('voong_finance_app.urls')),
     url(r'^admin/', admin.site.urls),
 ]
