@@ -10,6 +10,14 @@ var balance_initialisation = {
 	that.submit.click(function(){
 	    console.log('clicked');
 	    var data = {balance: parseFloat(that.input.val())};
+	    var csrftoken = getCookie('csrftoken');
+	    $.ajaxSetup({
+		beforeSend: function(xhr, settings) {
+		    if (!vf.csrfSafeMethod(settings.type) && !this.crossDomain) {
+			xhr.setRequestHeader("X-CSRFToken", csrftoken);
+		    }
+		}
+	    });
 	    $.post(balance_initialisation.initialise_balance_url, data, balance_initialisation.success_callback);
 	    that.div.remove();
 	})

@@ -11,6 +11,7 @@
     <h1>Welcome</h1>
     <div id='balance-initialisation'>
       <form onsubmit='return false;'>
+	{% csrf_token %}
 	<input id='input' type='number' name='initial-balance'>
 	<input id='submit-button' type='submit' value='Submit'>
       </form>
@@ -39,6 +40,7 @@
     <script src='{% static "voong_finance_app/js/balance_initialisation.js" %}'></script>
     <script src='{% static "voong_finance_app/js/balance_chart.js" %}'></script>
     <script src='{% static "voong_finance_app/js/home.js" %}'></script>
+    <script src='{% static "voong_finance/js/d3.js" %}'></script>
     <script>
       $.ready(vf.home.initialise());
     </script>
