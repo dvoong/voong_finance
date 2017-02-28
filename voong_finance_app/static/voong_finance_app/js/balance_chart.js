@@ -1,50 +1,55 @@
 console.log("balance-chart.js");
 
-var balance_chart = {
+var balance_chart = new function(){
+    var that = this;
+    
+    this.BalanceChart = function (div_id, data){
 
-    BalanceChart: function (div_id, data){
-	console.log('call BalanceChart');
-	console.log('data:');
-	console.log(data);
+	this.canvas = balance_chart.Canvas(this.div_id);
+	this.create_axes(this.canvas);
 	
-	var that = this;
-	this.div_id = div_id;
-	this.data = data;
-	this.margin = {top: 20, right: 20, bottom: 70, left: 40};
-	this.width = 600 - this.margin.left - this.margin.right;
-	this.height = 300 - this.margin.top - this.margin.bottom;
-	this.x = d3.scaleOrdinal()//.range([0, this.width]); // should be an array of the somethings
-	this.y = d3.scaleLinear().range([this.height, 0]);
+	// var that = this;
+	// this.div_id = div_id;
+	// this.data = data;
+	// this.margin = {top: 20, right: 20, bottom: 70, left: 40};
+	// this.width = 600 - this.margin.left - this.margin.right;
+	// this.height = 300 - this.margin.top - this.margin.bottom;
+	// this.x = d3.scaleOrdinal()//.range([0, this.width]); // should be an array of the somethings
+	// this.y = d3.scaleLinear().range([this.height, 0]);
 
-	this.svg = d3.select('#' + this.div_id)
-	    .append('svg')
-	    .attr('width', this.width + this.margin.left + this.margin.right)
-	    .attr('height', this.height + this.margin.top + this.margin.bottom)
-	    .append('g')
-	    .attr('transform', 'translate(' + this.margin.left + ',' + this.margin.top + ')');
+	// this.svg = d3.select('#' + this.div_id)
+	//     .append('svg')
+	//     .attr('width', this.width + this.margin.left + this.margin.right)
+	//     .attr('height', this.height + this.margin.top + this.margin.bottom)
+	//     .append('g')
+	//     .attr('transform', 'translate(' + this.margin.left + ',' + this.margin.top + ')');
 
-	var columns = data.columns;
-	var values = data.values;
-	var date_index = columns.indexOf('date');
-	var balance_index = columns.indexOf('balance');
+	// var columns = data.columns;
+	// var values = data.values;
+	// var date_index = columns.indexOf('date');
+	// var balance_index = columns.indexOf('balance');
 	
-	this.x.domain([0, values.length]); // .map(function(d) { return d[date_index]; }));
-	this.y.domain([0, d3.max(values, function(d) { return d[balance_index]; })]);
+	// this.x.domain([0, values.length]); // .map(function(d) { return d[date_index]; }));
+	// this.y.domain([0, d3.max(values, function(d) { return d[balance_index]; })]);
 	
-	this.svg.selectAll(".bar")
-	    .data(vals)
-	    .enter().append("rect")
-	    .attr("class", "bar")
-	    .attr("x", function(d) { return that.x(d[date_index]); })
-	    .attr("width", this.x.bandwidth())
-	    .attr("y", function(d) { return that.y(d[balance_chart]); })
-	    .attr("height", function(d) { return that.height - that.y(d[balance_index]); });
+	// this.svg.selectAll(".bar")
+	//     .data(values)
+	//     .enter().append("rect")
+	//     .attr("class", "bar")
+	//     .attr("x", function(d) { return that.x(d[date_index]); })
+	//     .attr("width", this.x.bandwidth())
+	//     .attr("y", function(d) { return that.y(d[balance_chart]); })
+	//     .attr("height", function(d) { return that.height - that.y(d[balance_index]); });
 
-    },
+    };
 
-    div_id: 'balance-chart',
+    this.BalanceChart.prototype.create_axes = function(canvas){
+	console.log('create_canvas');
+    };
 
-    pad_dates: function(data, start, end){
+    this.div_id = 'balance-chart';
+
+    this.pad_dates = function(data, start, end){
 	var first_date = new Date(data.values[0][0]);
 	var last_date = new Date(data.values[data.values.length-1][0])
 	var balance = 0;
@@ -64,12 +69,24 @@ var balance_chart = {
 	    padded_data.values.push([date_string, balance]);
 	}
 	return padded_data;
-    },
+    };
 
-    get_balance: function(date, data){
-    }
+    this.get_balance = function(date, data){
+    };
+
+    this.dates = function(data){
+	var dates = [];
+	for(var i=0; i<data.values.length; i++){
+	    var date_string = data.values[i][0];
+	    dates.push(new Date(date_string));
+	}
+	return dates;
+    };
+
+    this.Canvas = function(div_id) {
+    };
     
-};
+}
 
 // function createBalanceChart(data){
 //     console.log("createBalanceChart");

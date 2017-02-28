@@ -43,5 +43,22 @@ QUnit.test('Pad dates', function(assert){
 QUnit.test('Get dates', function(assert){
     var dates = balance_chart.dates(this.data);
     var expected = [new Date('2017-01-01'), new Date('2017-01-02')]
-    assert.equal(dates, expected);
+    assert.deepEqual(dates, expected);
+});
+
+QUnit.test('Chart initialisation creates a canvas', function(assert){
+    var spy = sinon.spy(balance_chart, 'Canvas');
+    var chart = new balance_chart.BalanceChart(this.div_id, this.data);
+    assert.equal(true, spy.calledOnce);
+});
+
+QUnit.test('Chart initialisation creates axes', function(assert){
+    var spy = sinon.spy(balance_chart.BalanceChart.prototype, 'create_axes');
+    var chart = new balance_chart.BalanceChart(this.div_id, this.data);
+    assert.equal(true, spy.calledOnce);
+    assert.equal(true, spy.calledWith(chart.canvas));
+});
+
+QUnit.test('Chart configures axis range', function(assert){
+    assert.equal(true, false, 'todo');
 });
