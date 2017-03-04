@@ -27,6 +27,8 @@ var balance_initialisation = {
 
     success_callback: function(data){
 	console.log('success callback');
+	console.log('todo: pad the data')
+	console.log(data);
 	return new balance_chart.BalanceChart(data, balance_chart.div_id);
     }
     

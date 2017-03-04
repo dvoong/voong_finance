@@ -37,7 +37,7 @@ QUnit.test('Upon successful submission of the form hide/delete the balance_initi
 
 QUnit.test('Upon successful submission of the form call create_balance_chart', function(assert){
     var spy = sinon.spy(balance_chart, 'BalanceChart');
-    var data = {date: ['2017-01-24', '2017-01-25'], balance: [10, 10]}
+    var data = {date: '2017-01-24', balance: 10}
     this.server.respondWith("POST",
 			    this.balance_initialisation.initialise_balance_url,
 			    [200, { "Content-Type": "application/json" }, JSON.stringify(data)]
@@ -46,6 +46,10 @@ QUnit.test('Upon successful submission of the form call create_balance_chart', f
     this.server.respond();
     assert.ok(spy.calledOnce, 'BalanceChart not called');
     assert.ok(spy.calledWith(data, balance_chart.div_id), 'BalanceChart not called with args');
+    // check BalanceChart is called with the data in appropriate data
+    // check pad dates is called with appropriate args
+    // check output of pad dates is used as the data argument for the balance chart
+    assert.ok(false, 'todo');
 });
 
 QUnit.test('Upon successful submission return a new BalanceChart object', function(assert){

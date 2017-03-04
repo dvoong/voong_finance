@@ -78,6 +78,14 @@ QUnit.test('Chart configures axis range', function(assert){
     spy.restore();
 });
 
+QUnit.test('Chart draws axis', function(assert){
+    var spy = sinon.spy(balance_chart.BalanceChart.prototype, 'draw_axes');
+    var chart = new balance_chart.BalanceChart(this.data, this.div_id);
+    assert.equal(true, spy.calledOnce);
+    assert.equal(true, spy.calledWith(chart.axes, chart.canvas));
+    spy.restore();
+});
+
 QUnit.test('Chart plots the data', function(assert){
     var spy = sinon.spy(balance_chart.BalanceChart.prototype, 'plot_data');
     var chart = new balance_chart.BalanceChart(this.data, this.div_id);
@@ -146,41 +154,37 @@ QUnit.test('xaxis is on the bottom and yaxis is on the left', function(assert){
 
 });
 
-QUnit.test('xaxis is ordinal', function(assert){
-    var xaxis = d3.axisBottom(d3.scaleOrdinal());
-    var scale = d3.scaleOrdinal();
-    var stub_axis = sinon.stub(d3, 'axisBottom').returns(xaxis);
-    var stub_scale = sinon.stub(d3, 'scaleOrdinal').returns(scale);
+QUnit.test('xaxis scale is of type scaleBand', function(assert){
+    var scale = d3.scaleBand();
+    var axis_spy = sinon.spy(d3, 'axisBottom');
+    var scale_stub = sinon.stub(d3, 'scaleBand').returns(scale);
 	
     var axes = balance_chart.BalanceChart.prototype.create_axes(this.canvas);
 
-    assert.ok(stub_axis.calledWith(scale));
-    assert.ok(axes.xaxis == xaxis);
+    assert.ok(axis_spy.calledWith(scale));
 
-    stub_axis.restore();
-    stub_scale.restore();
+    axis_spy.restore();
+    scale_stub.restore();
 });
 
 QUnit.test('yaxis is linear', function(assert){
     var scale = d3.scaleLinear();
-    var yaxis = d3.axisBottom(scale);
-    var stub_axis = sinon.stub(d3, 'axisLeft').returns(yaxis);
-    var stub_scale = sinon.stub(d3, 'scaleLinear').returns(scale);
+    var axis_spy = sinon.spy(d3, 'axisLeft');
+    var scale_stub = sinon.stub(d3, 'scaleLinear').returns(scale);
 	
     var axes = balance_chart.BalanceChart.prototype.create_axes(this.canvas);
 
-    assert.ok(stub_axis.calledWith(scale));
-    assert.ok(axes.yaxis == yaxis);
+    assert.ok(axis_spy.calledWith(scale));
 
-    stub_axis.restore();
-    stub_scale.restore();
+    axis_spy.restore();
+    scale_stub.restore();
 });
 
-QUnit.test('set range of axes', function(assert){
+QUnit.test('set range of x axis', function(assert){
 
-    var scale = d3.scaleOrdinal();
-    var stub = sinon.stub(d3, 'scaleOrdinal').returns(scale);
-    var range = sinon.spy(scale, 'range');
+    var scale = d3.scaleBand();
+    var stub = sinon.stub(d3, 'scaleBand').returns(scale);
+    var range = sinon.spy(scale, 'rangeRound');
 	
     var axes = balance_chart.BalanceChart.prototype.create_axes(this.canvas);
 
@@ -215,8 +219,10 @@ QUnit.test('set range of y axis', function(assert){
 
 QUnit.module('configure_axes tests', {
     beforeEach: function(){
-	this.xaxis = {range: function(){}, domain: function(){}};
-	this.yaxis = {range: function(){}, domain: function(){}};
+	var xscale = d3.scaleBand();
+	var yscale = d3.scaleLinear();
+	this.xaxis = d3.axisBottom(xscale);
+	this.yaxis = d3.axisLeft(yscale);
 	this.width = 1;
 	this.height = 2;
 	this.margin = {top: 1, right: 2, bottom: 3, left: 4};
@@ -228,30 +234,34 @@ QUnit.module('configure_axes tests', {
     }
 });
 
-QUnit.test('set domain of axes', function(assert){
-    var xspy = sinon.spy(this.xaxis, 'domain');
-    var yspy = sinon.spy(this.yaxis, 'domain');
+QUnit.test('set domain of the xaxis', function(assert){
 
-    var axes = balance_chart.BalanceChart.prototype.configure_axes(this.axes, this.width, this.height, this.margin, this.data);
+    var domain_spy = sinon.spy(this.xaxis.scale(), 'domain');
+
+    balance_chart.BalanceChart.prototype.configure_axes(this.axes, this.width, this.height, this.margin, this.data);
     
-    assert.ok(false, 'todo');
-    
+    assert.ok(domain_spy.calledOnce);
+    assert.ok(domain_spy.calledWith(['2017-01-01', '2017-01-02']), domain_spy.firstCall);
 });
 
+QUnit.test('set domain of the yaxis', function(assert){
 
-// QUnit.test('xaxis is an ordinal axis', function(assert){
+    var domain_spy = sinon.spy(this.yaxis.scale(), 'domain');
 
-//     var xaxis = {axis: 'x'};
-//     var xaxis_stub = sinon.stub(d3, 'scaleOrdinal').returns(xaxis);
-//     var yaxis = {yaxis: 'y'};
-//     var yaxis_stub = sinon.stub(d3, 'scaleLinear').returns(yaxis);
+    balance_chart.BalanceChart.prototype.configure_axes(this.axes, this.width, this.height, this.margin, this.data);
+    
+    assert.ok(domain_spy.calledOnce);
+    assert.ok(domain_spy.calledWith([0, 11]), domain_spy.firstCall);
+});
 
-//     var axes = balance_chart.BalanceChart.prototype.create_axes();
+QUnit.module('draw_axes tests', {
+    beforeEach: function(){
+	this.axes = {xaxis: {}, yaxis: {}};
+	this.canvas = {};
+    }
+});
 
-//     assert.equal(axes.xaxis, xaxis);
-//     assert.equal(axes.yaxis, yaxis);
-
-//     xaxis_stub.restore();
-//     yaxis_stub.restore()
-
+// QUnit.test('', function(assert){
+//     assert.ok(false, 'todo');
+    
 // });

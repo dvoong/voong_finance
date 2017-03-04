@@ -13,13 +13,14 @@ var balance_chart = new function(){
 					   this.margin);
 	this.axes = this.create_axes(this.canvas);
 	this.configure_axes(this.axes, this.width, this.height, this.margin, this.data);
+	this.draw_axes(this.axes, this.canvas);
 	this.plot_data();
 	this.label_chart();
 
     };
 
     this.BalanceChart.prototype.create_axes = function(canvas){
-	var scalex = d3.scaleOrdinal().range([canvas.margin.left, canvas.width - canvas.margin.right]);
+	var scalex = d3.scaleBand().rangeRound([canvas.margin.left, canvas.width - canvas.margin.right]);
 	var scaley = d3.scaleLinear().range([canvas.height - canvas.margin.bottom, canvas.margin.top]);
 	var xaxis = d3.axisBottom(scalex);
 	var yaxis = d3.axisLeft(scaley);
@@ -27,14 +28,14 @@ var balance_chart = new function(){
     };
 
     this.BalanceChart.prototype.configure_axes = function(axes, width, height, margin, data){
-	
-	// axes.xaxis.range([margin.left, width - margin.right]);
-	// axes.yaxis.range([height - margin.bottom, margin.top]);
-	// return axes;
-	// .x = d3.scaleOrdinal()//.range([0, this.width]); // should be an array of the somethings
-	// this.y = d3.scaleLinear().range([this.height, 0]);
-	// this.x.domain([0, values.length]); // .map(function(d) { return d[date_index]; }));
-	// this.y.domain([0, d3.max(values, function(d) { return d[balance_index]; })]);
+	var dates = data.values.map(function(d){return d[0]});
+	axes.xaxis.scale().domain(dates);
+	axes.yaxis.scale().domain([0, d3.max(data.values, function(d){return d[1]})]);
+    };
+
+    this.BalanceChart.prototype.draw_axes = function(axes, canvas){
+	var g = canvas.svg.append('g');
+	g.attr('id', 'xaxis').call(this.axes.xaxis).attr('transform', 'translate(0, ' + (this.canvas.height - this.canvas.margin.bottom) + ')')
     };
 
     this.BalanceChart.prototype.plot_data = function(){
