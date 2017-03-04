@@ -3,35 +3,46 @@ console.log("balance-chart.js");
 var balance_chart = new function(){
     var that = this;
     
-    this.BalanceChart = function (div_id, data){
+    this.BalanceChart = function (data, div_id){
 
-	this.canvas = balance_chart.Canvas(this.div_id);
-	this.create_axes(this.canvas);
+	this.data = data;
+	this.div_id = div_id !== undefined ? div_id : 'balance-chart';
+	this.canvas = new balance_chart.Canvas(this.div_id,
+					   this.height,
+					   this.width,
+					   this.margin);
+	this.axes = this.create_axes(this.canvas);
+	this.configure_axes(this.axes, this.width, this.height, this.margin, this.data);
+	this.plot_data();
+	this.label_chart();
+
+    };
+
+    this.BalanceChart.prototype.create_axes = function(canvas){
+	var scalex = d3.scaleOrdinal().range([canvas.margin.left, canvas.width - canvas.margin.right]);
+	var scaley = d3.scaleLinear().range([canvas.height - canvas.margin.bottom, canvas.margin.top]);
+	var xaxis = d3.axisBottom(scalex);
+	var yaxis = d3.axisLeft(scaley);
+	return {xaxis: xaxis, yaxis: yaxis};
+    };
+
+    this.BalanceChart.prototype.configure_axes = function(axes, width, height, margin, data){
 	
-	// var that = this;
-	// this.div_id = div_id;
-	// this.data = data;
-	// this.margin = {top: 20, right: 20, bottom: 70, left: 40};
-	// this.width = 600 - this.margin.left - this.margin.right;
-	// this.height = 300 - this.margin.top - this.margin.bottom;
-	// this.x = d3.scaleOrdinal()//.range([0, this.width]); // should be an array of the somethings
+	// axes.xaxis.range([margin.left, width - margin.right]);
+	// axes.yaxis.range([height - margin.bottom, margin.top]);
+	// return axes;
+	// .x = d3.scaleOrdinal()//.range([0, this.width]); // should be an array of the somethings
 	// this.y = d3.scaleLinear().range([this.height, 0]);
+	// this.x.domain([0, values.length]); // .map(function(d) { return d[date_index]; }));
+	// this.y.domain([0, d3.max(values, function(d) { return d[balance_index]; })]);
+    };
 
-	// this.svg = d3.select('#' + this.div_id)
-	//     .append('svg')
-	//     .attr('width', this.width + this.margin.left + this.margin.right)
-	//     .attr('height', this.height + this.margin.top + this.margin.bottom)
-	//     .append('g')
-	//     .attr('transform', 'translate(' + this.margin.left + ',' + this.margin.top + ')');
-
+    this.BalanceChart.prototype.plot_data = function(){
+	
 	// var columns = data.columns;
 	// var values = data.values;
 	// var date_index = columns.indexOf('date');
 	// var balance_index = columns.indexOf('balance');
-	
-	// this.x.domain([0, values.length]); // .map(function(d) { return d[date_index]; }));
-	// this.y.domain([0, d3.max(values, function(d) { return d[balance_index]; })]);
-	
 	// this.svg.selectAll(".bar")
 	//     .data(values)
 	//     .enter().append("rect")
@@ -40,14 +51,15 @@ var balance_chart = new function(){
 	//     .attr("width", this.x.bandwidth())
 	//     .attr("y", function(d) { return that.y(d[balance_chart]); })
 	//     .attr("height", function(d) { return that.height - that.y(d[balance_index]); });
-
     };
 
-    this.BalanceChart.prototype.create_axes = function(canvas){
-	console.log('create_canvas');
+    this.BalanceChart.prototype.label_chart = function(){
     };
 
     this.div_id = 'balance-chart';
+    this.BalanceChart.prototype.height = 300;
+    this.BalanceChart.prototype.width = 600;
+    this.BalanceChart.prototype.margin = {top: 20, right: 20, bottom: 70, left: 40};
 
     this.pad_dates = function(data, start, end){
 	var first_date = new Date(data.values[0][0]);
@@ -83,7 +95,32 @@ var balance_chart = new function(){
 	return dates;
     };
 
-    this.Canvas = function(div_id) {
+    this.Canvas = function(div_id, height, width, margin) {
+	this.div_id = div_id;
+	this.height = height;
+	this.width = width;
+	this.margin = margin;
+	this.svg = d3.select('#' + div_id).append('svg')
+	    .attr('height', height)
+	    .attr('width', width)
+	    .attr('margin', margin);
+
+	//console.log(bc.attr('cheese'));
+	// console.log(this.svg.attr('width'));
+	
+	//console.log(d3.selectAll('svg').attr('width'));
+	// console.log(this.svg.attr);
+	// console.log(this.svg.attr('cheese', 10));
+	
+	// this.margin = {top: 20, right: 20, bottom: 70, left: 40};
+	// this.width = 600 - this.margin.left - this.margin.right;
+	// this.height = 300 - this.margin.top - this.margin.bottom;
+	// this.svg = d3.select('#' + this.div_id)
+	//     .append('svg')
+	//     .attr('width', this.width + this.margin.left + this.margin.right)
+	//     .attr('height', this.height + this.margin.top + this.margin.bottom)
+	//     .append('g')
+	//     .attr('transform', 'translate(' + this.margin.left + ',' + this.margin.top + ')');
     };
     
 }

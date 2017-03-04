@@ -45,5 +45,11 @@ QUnit.test('Upon successful submission of the form call create_balance_chart', f
     this.balance_initialisation.submit.click();
     this.server.respond();
     assert.ok(spy.calledOnce, 'BalanceChart not called');
-    assert.ok(spy.calledWith(balance_chart.div_id, data), 'BalanceChart not called with args');
+    assert.ok(spy.calledWith(data, balance_chart.div_id), 'BalanceChart not called with args');
+});
+
+QUnit.test('Upon successful submission return a new BalanceChart object', function(assert){
+    var data = {'a': 1};
+    var chart = balance_initialisation.success_callback(data);
+    assert.ok(chart instanceof balance_chart.BalanceChart);
 });
