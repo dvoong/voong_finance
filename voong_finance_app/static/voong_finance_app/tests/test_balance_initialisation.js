@@ -35,9 +35,27 @@ QUnit.test('Upon successful submission of the form hide/delete the balance_initi
     assert.ok($('#balance-initialisation').length == 0, "balance-initialisation removed from document");
 });
 
+QUnit.test('success_callback calls pad_dates', function(assert){
+    var spy = sinon.spy(balance_chart, 'pad_dates');
+    var data = {date: '2017-01-24', balance: 10};
+    var start = new Date(2017, 0, 10);
+    var end = new Date(2017, 1, 7);
+
+    balance_initialisation.success_callback(data);
+
+    assert.ok(spy.calledOnce);
+    var data = {columns: ['date', 'balance'], values: [['2017-01-24', 10]]}
+    assert.ok(spy.calledWith(data, start, end));
+
+    spy.restore();
+});
+
 QUnit.test('Upon successful submission of the form call create_balance_chart', function(assert){
     var spy = sinon.spy(balance_chart, 'BalanceChart');
     var data = {date: '2017-01-24', balance: 10}
+    var padded_data = {columns: ['date', 'balance'], values: [['2017-01-24', 10]]}
+    var pad_dates_stub = sinon.stub(balance_chart, 'pad_dates').returns(padded_data);
+    
     this.server.respondWith("POST",
 			    this.balance_initialisation.initialise_balance_url,
 			    [200, { "Content-Type": "application/json" }, JSON.stringify(data)]
@@ -45,11 +63,9 @@ QUnit.test('Upon successful submission of the form call create_balance_chart', f
     this.balance_initialisation.submit.click();
     this.server.respond();
     assert.ok(spy.calledOnce, 'BalanceChart not called');
-    assert.ok(spy.calledWith(data, balance_chart.div_id), 'BalanceChart not called with args');
-    // check BalanceChart is called with the data in appropriate data
-    // check pad dates is called with appropriate args
-    // check output of pad dates is used as the data argument for the balance chart
-    assert.ok(false, 'todo');
+    assert.ok(spy.calledWith(padded_data, balance_chart.div_id), 'BalanceChart not called with args');
+
+    pad_dates_stub.restore();
 });
 
 QUnit.test('Upon successful submission return a new BalanceChart object', function(assert){

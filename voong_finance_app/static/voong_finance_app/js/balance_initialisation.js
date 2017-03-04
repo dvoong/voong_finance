@@ -29,6 +29,13 @@ var balance_initialisation = {
 	console.log('success callback');
 	console.log('todo: pad the data')
 	console.log(data);
+	var date = data['date'];
+	var balance = data['balance'];
+	var data = {columns: ['date', 'balance'], values: [[date, balance]]}; // change format
+	var start = new Date(new Date(date) - 14 * 24 * 60 * 60 * 1000);
+	var end = new Date(date);
+	end.setDate(end.getDate() + 14);
+	var data = balance_chart.pad_dates(data, start, end) // with padded dates
 	return new balance_chart.BalanceChart(data, balance_chart.div_id);
     }
     
