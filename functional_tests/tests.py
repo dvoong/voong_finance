@@ -60,21 +60,12 @@ class FunctionalTest(StaticLiveServerTestCase):
         balance_chart = self.wait_for_element_with_id('balance-chart')
 
         # The balance chart shows
-        # x axis: date
-        x_axis = balance_chart.find_element_by_id('x-axis')
-        self.assertEqual(get_axis_title(x_axis), 'Date')
-        # y axis: balance
-        y_axis = balance_chart.find_element_by_id('y-axis')
-        self.assertEqual(get_axis_title(y_axis), 'Balance')
-        # today centered on the x axis
-        dates = get_dates(balance_chart)
-        self.assertEqual(len(dates), 43)
-        # today's balance at 4334.40
-        self.assertEqual(get_balance(dates[21], balance_chart), INITIAL_BALANCE)
-        # three weeks ahead
-        dates[42] = today + datetime.timedelta(days=21)
-        # three weeks behind
-        dates[0] = today - datetime.timedelta(days=21)
+        bars = balance_chart.find_elements_by_css_selector('.bar');
+        self.assertEqual(len(bars), 29)
+
+        self.assertEqual(bars[0].get_attribute('balance'), str(0))
+        self.assertEqual(bars[1].get_attribute('balance'), str(INITIAL_BALANCE))
+        self.assertEqual(bars[-1].get_attribute('balance'), str(INITIAL_BALANCE))
 
         # the initial balance prompt should have disappeared
         with self.assertRaises(NoSuchElementException):
@@ -97,7 +88,7 @@ class FunctionalTest(StaticLiveServerTestCase):
         
         # he is now invited to create his first entry
         # perhaps a popup appears over a highlighted transaction button or the rest of the page is dimmed
-        first_entry_prompt = self.browser.find_element_by_id('first-entry-prompt')
+        first_entry_prompt = self.get_first_entry_prompt()
 
         # a transaction form appears
         transaction_form = first_entry_prompt.find_element_by_id('transaction-form')
@@ -129,8 +120,13 @@ class FunctionalTest(StaticLiveServerTestCase):
         # david clicks the create transaction button
         create_transaction_btn = transaction_form.find_element_by_id('create-transaction-btn')
         create_transaction_btn.click()
+
+        # the first transaction prompt disappears
+        with self.assertRaises(NoSuchElementException):
+            self.get_first_entry_prompt()
         
         # The balance chart updates
+        
         
         # next week shows the balance as 4329.40, this is true for dates following it also
         # the dates between today and next week show the original balance (inclusive of today, exclusive of next week)
@@ -150,6 +146,9 @@ class FunctionalTest(StaticLiveServerTestCase):
         # Need to mock the today method in the datetime module?
         # problem: cannot mock the datetime module for the server, it's in a different python process
         self.assertEqual(1, 0, 'Finish functional tests')
+
+    def get_first_entry_prompt(self):
+        return self.browser.find_element_by_id('first-entry-prompt')
 
     #     # OLD STUFF
     #     # homepage shows a balance chart

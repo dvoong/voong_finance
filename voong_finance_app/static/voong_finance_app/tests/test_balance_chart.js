@@ -9,11 +9,6 @@ QUnit.module("createBalanceChart tests", {
     afterEach: function(){}
 });
 
-// Qunit.test('Pads 21 days ahead and 21 days behind', function(assert){
-//     var balance_chart = new balance_chart.BalanceChart(this.div_id, this.data);
-    
-// });
-
 QUnit.test('Pad dates', function(assert){
 
     var data = this.data;
@@ -37,6 +32,7 @@ QUnit.test('Pad dates', function(assert){
     }
     
     assert.deepEqual(padded_data, expected)
+    get_balance.restore();
     
 });
 
@@ -58,7 +54,7 @@ QUnit.test('Chart default parameters', function(assert){
     var chart = new balance_chart.BalanceChart(this.data);
     assert.equal(chart.div_id, 'balance-chart');
     assert.equal(chart.height, 300);
-    assert.equal(chart.width, 600);
+    assert.equal(chart.width, 1200);
     assert.deepEqual(chart.margin, {top: 20, right: 20, bottom: 70, left: 40});
 });
 
@@ -90,7 +86,7 @@ QUnit.test('Chart plots the data', function(assert){
     var spy = sinon.spy(balance_chart.BalanceChart.prototype, 'plot_data');
     var chart = new balance_chart.BalanceChart(this.data, this.div_id);
     assert.equal(true, spy.calledOnce);
-    assert.equal(true, spy.calledWith());
+    assert.equal(true, spy.calledWith(chart.data, chart.canvas));
     spy.restore();
 });
 
@@ -146,8 +142,8 @@ QUnit.test('xaxis is on the bottom and yaxis is on the left', function(assert){
 	
     var axes = balance_chart.BalanceChart.prototype.create_axes(this.canvas);
 
-    assert.ok(axes.xaxis == xaxis);
-    assert.ok(axes.yaxis == yaxis);
+    assert.ok(axes.xaxis.call == xaxis);
+    assert.ok(axes.yaxis.call == yaxis);
 
     stub_x.restore();
     stub_y.restore();
@@ -226,7 +222,7 @@ QUnit.module('configure_axes tests', {
 	this.width = 1;
 	this.height = 2;
 	this.margin = {top: 1, right: 2, bottom: 3, left: 4};
-	this.axes = {xaxis: this.xaxis, yaxis: this.yaxis};
+	this.axes = {xaxis: new balance_chart.Axis(this.xaxis), yaxis: new balance_chart.Axis(this.yaxis)};
 	this.data = {
 	    columns: ['date', 'balance'],
 	    values: [['2017-01-01', 10], ['2017-01-02', 11]]
@@ -237,11 +233,16 @@ QUnit.module('configure_axes tests', {
 QUnit.test('set domain of the xaxis', function(assert){
 
     var domain_spy = sinon.spy(this.xaxis.scale(), 'domain');
+    var shortened_dates = ['1 Jan', '2 Jan'];
+    var shorten_date_strings_stub = sinon.stub(balance_chart, 'shorten_date_strings').returns(shortened_dates);
 
     balance_chart.BalanceChart.prototype.configure_axes(this.axes, this.width, this.height, this.margin, this.data);
     
     assert.ok(domain_spy.calledOnce);
-    assert.ok(domain_spy.calledWith(['2017-01-01', '2017-01-02']), domain_spy.firstCall);
+    // assert.ok(domain_spy.calledWith(['2017-01-01', '2017-01-02']), domain_spy.firstCall);
+    assert.ok(domain_spy.calledWith(shortened_dates), 'call domain with shortened dates');
+
+    shorten_date_strings_stub.restore();
 });
 
 QUnit.test('set domain of the yaxis', function(assert){
@@ -261,7 +262,70 @@ QUnit.module('draw_axes tests', {
     }
 });
 
-QUnit.test('', function(assert){
-    assert.ok(false, 'todo');
+QUnit.test('appends g elements for x and y axes', function(assert){
+    var canvas = new balance_chart.Canvas('balance-chart', 1, 2, {top: 1, right: 2, bottom: 3, left: 4});
+    var axes = balance_chart.BalanceChart.prototype.create_axes(canvas);
+    
+    balance_chart.BalanceChart.prototype.draw_axes(axes, canvas);
+
+    assert.ok(canvas.svg.select('#xaxis').node() !== undefined);
+    assert.ok(canvas.svg.select('#yaxis').node() !== undefined);
+});
+
+QUnit.module('get_balance', {});
+
+QUnit.test('test get_balance', function(assert){
+    var date = '2017-01-24';
+    var data = {columns: ['date', 'balance'], values: [['2017-01-24', 10], ['2017-01-25', 22]]};
+    var balance = balance_chart.get_balance(date, data);
+
+    assert.equal(balance, 10);
+});
+
+QUnit.module('shorten_date_strings tests', {});
+
+QUnit.test('shortens an array of date strings', function(assert){
+    var input = ['2017-01-1', '2017-01-02'];
+    var expected = ['1 Jan', '2 Jan'];
+
+    var output = balance_chart.shorten_date_strings(input);
+    
+    assert.deepEqual(output, expected);
+});
+
+QUnit.test('if input is a string then return just that shortened date string', function(assert){
+    var input = '2017-01-01';
+    var expected = '1 Jan';
+
+    var output = balance_chart.shorten_date_strings(input);
+
+    assert.equal(output, expected);
+});
+
+QUnit.module('label_chart tests', {});
+
+// QUnit.test('calls add title to the x-axis passing the title and the x-axis element', function(assert){
+
+//     var label_axis = sinon.spy(balance_chart, 'label_axis');
+//     var data = {columns: ['date', 'balance'], values: [['2017-01-01', 10], ['2017-01-02', 11]]};
+//     var div_id = 'balance-chart';
+
+//     var chart = new balance_chart.BalanceChart(data, div_id);
+
+//     assert.ok(label_axis.calledWith(chart.axes.xaxis.element, 'Date'));
+
+//     label_axis.restore();
+// });
+
+QUnit.module('label_axis tests', {});
+
+QUnit.test('something', function(assert){
+
+    var xaxis = d3.select('body').append('g');
+
+    balance_chart.label_axis(xaxis, 'Date');
+
+    console.log(xaxis);
+    assert.equal(xaxis.select('text').text(), 'Date');
     
 });

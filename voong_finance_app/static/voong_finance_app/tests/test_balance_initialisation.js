@@ -38,8 +38,8 @@ QUnit.test('Upon successful submission of the form hide/delete the balance_initi
 QUnit.test('success_callback calls pad_dates', function(assert){
     var spy = sinon.spy(balance_chart, 'pad_dates');
     var data = {date: '2017-01-24', balance: 10};
-    var start = new Date(2017, 0, 10);
-    var end = new Date(2017, 1, 7);
+    var start = new Date(2017, 0, 23);
+    var end = new Date(2017, 1, 20);
 
     balance_initialisation.success_callback(data);
 
