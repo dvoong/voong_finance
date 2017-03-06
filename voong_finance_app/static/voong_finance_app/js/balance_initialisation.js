@@ -33,7 +33,8 @@ var balance_initialisation = {
 	var end = new Date(date);
 	end.setDate(end.getDate() + 27);
 	var data = balance_chart.pad_dates(data, start, end) // with padded dates
-	return new balance_chart.BalanceChart(data, balance_chart.div_id);
+	new balance_chart.BalanceChart(data, balance_chart.div_id);
+	var first_transaction_prompt = new transactions.FirstTransactionPrompt();
     }
     
 }

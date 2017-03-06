@@ -5,5 +5,6 @@ from . import views
 
 urlpatterns = [
     url(r'^$', views.home, name='home'),
-    url(r'initialise-balance', views.initialise_balance, name='initialise_balance')
+    url(r'initialise-balance$', views.initialise_balance, name='initialise_balance'),
+    url(r'transaction-form$', views.transaction_form, name='transaction_form'),
 ]

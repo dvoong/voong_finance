@@ -1,0 +1,3 @@
+class TransactionForm(object):
+
+    pass

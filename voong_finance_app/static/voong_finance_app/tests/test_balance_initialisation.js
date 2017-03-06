@@ -66,10 +66,28 @@ QUnit.test('Upon successful submission of the form call create_balance_chart', f
     assert.ok(spy.calledWith(padded_data, balance_chart.div_id), 'BalanceChart not called with args');
 
     pad_dates_stub.restore();
+    spy.restore();
 });
 
-QUnit.test('Upon successful submission return a new BalanceChart object', function(assert){
+// QUnit.test('Upon successful submission return a new BalanceChart object', function(assert){
+//     var data = {'a': 1};
+//     var chart = balance_initialisation.success_callback(data);
+//     assert.ok(chart instanceof balance_chart.BalanceChart);
+// });
+
+QUnit.module('Successful ajax balance initialisation creates a first transaction prompt', {});
+
+QUnit.test('test', function(assert){
+
     var data = {'a': 1};
-    var chart = balance_initialisation.success_callback(data);
-    assert.ok(chart instanceof balance_chart.BalanceChart);
+    var first_transaction_prompt = sinon.stub(transactions, 'FirstTransactionPrompt');
+    var BalanceChart = sinon.stub(balance_chart, 'BalanceChart');
+
+    balance_initialisation.success_callback(data);
+    
+    assert.ok(first_transaction_prompt.calledOnce, 'FirstTransactionPrompt called');
+    assert.ok(BalanceChart.calledBefore(first_transaction_prompt));
+
+    BalanceChart.restore();
+    first_transaction_prompt.restore();
 });
