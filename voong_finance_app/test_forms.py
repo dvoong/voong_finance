@@ -6,3 +6,7 @@ class TestTransactionForm(TestCase):
     def test(self):
 
         form = TransactionForm()
+        widget = form.fields['transaction_type'].widget
+
+        self.assertEqual(widget.attrs['id'], 'transaction-type-dropdown')
+        
