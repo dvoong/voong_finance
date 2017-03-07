@@ -8,7 +8,6 @@ var balance_initialisation = {
 	that.input = that.div.find('#input');
 	that.submit = that.div.find('#submit-button');
 	that.submit.click(function(){
-	    console.log('clicked');
 	    var data = {balance: parseFloat(that.input.val())};
 	    var csrftoken = getCookie('csrftoken');
 	    $.ajaxSetup({
