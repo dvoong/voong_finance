@@ -102,8 +102,11 @@ class FunctionalTest(StaticLiveServerTestCase):
         transaction_description.send_keys('Phone Bill')
         
         # david sets the date to next week
-        date_selector = transaction_form.find_element_by_id('date-selector')
-        date_selector.send_keys((self.today + datetime.timedelta(days=7)).isoformat())
+        # date_selector = transaction_form.find_element_by_id('date-selector')
+        # date_selector.send_keys((self.today + datetime.timedelta(days=7)).isoformat())
+        year_selector = transaction_form.find_element_by_id('date-selector_year');
+        month_selector = transaction_form.find_element_by_id('date-selector_month');
+        day_selector = transaction_form.find_element_by_id('date-selector_day');
         
         # david ticks the "transaction repeats" checkbox
         repeating_transaction_checkbox = transaction_form.find_element_by_id('repeating-transaction-checkbox')
