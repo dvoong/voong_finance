@@ -13,27 +13,13 @@
       <form onsubmit='return false;'>
 	{% csrf_token %}
 	<input id='input' type='number' name='initial-balance'>
+	<input id='date'>
 	<input id='submit-button' type='submit' value='Submit'>
       </form>
     </div>
     <div id="balance-chart"></div>
     <div id='calendar'></div>
-    <!-- <div id='first-entry-prompt'>
-	 <form id='transaction-form' onsubmit='return false;'>
-	 <select id='transaction-type-dropdown' name='transaction-type'>
-	 <option value='expense'>Expense</option>
-	 </select>
-	 <input id='transaction-description' type='text' />
-	 <input id='date-selector' type='date' />
-	 <input id='repeating-transaction-checkbox' type='checkbox' />
-	 <select id='repeat-frequency-dropdown' name='repeat-frequency'>
-	 <option value='monthly'>Monthly</option>
-	 </select>
-	 <input id='transaction-size-input' type='number' />
-	 <button id='create-transaction-btn' type='submit'>Create Transaction</button>
-	 </form>
-	 </div>
-       -->
+
     <script src="http://code.jquery.com/jquery.min.js"></script>    
     {% load static %}
     <script src='{% static "voong_finance_app/js/vf.js" %}'></script>

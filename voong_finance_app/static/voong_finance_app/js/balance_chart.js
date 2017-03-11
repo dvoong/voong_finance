@@ -67,6 +67,7 @@ var balance_chart = new function(){
 	    .enter().append('rect')
 	    .attr('class', 'bar')
 	    .attr('balance', function(d){return d[1]})
+	    .attr('date', function(d){return d[0]})
 	    .attr('x', function(d){
 		return that.axes.xaxis.call.scale()(
 		    balance_chart.shorten_date_strings(d[0])

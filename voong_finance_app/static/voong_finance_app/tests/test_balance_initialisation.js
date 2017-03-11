@@ -14,12 +14,13 @@ QUnit.module("Balance Initialisation Tests", {
 QUnit.test('Submission of the form makes an ajax call to the initialise_balance api', function(assert){
     var stub = sinon.stub(jQuery, 'post');
     var url = balance_initialisation.initialise_balance_url;
-    var data = {balance: 4344.40}
+    var data = {balance: 4344.40, date: '2017-01-24'}
     var callback = balance_initialisation.success_callback;
     this.balance_initialisation.input.val(data.balance);
+    this.balance_initialisation.date_input.val(data.date);
     this.balance_initialisation.submit.click();
     assert.ok(stub.calledOnce);
-    assert.ok(stub.calledWith(url, data, callback));
+    assert.deepEqual(stub.firstCall.args, [url, data, callback]);
     stub.restore();
 });
 

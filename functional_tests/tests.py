@@ -48,6 +48,8 @@ class FunctionalTest(StaticLiveServerTestCase):
         initialise_balance = self.wait_for_element_with_id('balance-initialisation')
         input_field = initialise_balance.find_element_by_id('input')
         submit_button = initialise_balance.find_element_by_id('submit-button')
+        date = initialise_balance.find_element_by_id('date')
+        date.send_keys(self.today.isoformat())
 
         # he inputs his balance as 4344.40 GBP and hits ok/next/done button
         input_field.send_keys(str(INITIAL_BALANCE))
@@ -102,11 +104,15 @@ class FunctionalTest(StaticLiveServerTestCase):
         transaction_description.send_keys('Phone Bill')
         
         # david sets the date to next week
+        date = self.today + datetime.timedelta(days=7)
         # date_selector = transaction_form.find_element_by_id('date-selector')
         # date_selector.send_keys((self.today + datetime.timedelta(days=7)).isoformat())
         year_selector = transaction_form.find_element_by_id('date-selector_year');
+        year_selector.send_keys(self.today.year)
         month_selector = transaction_form.find_element_by_id('date-selector_month');
+        month_selector.send_keys(self.today.month)
         day_selector = transaction_form.find_element_by_id('date-selector_day');
+        day_selector.send_keys(self.today.day)
         
         # david ticks the "transaction repeats" checkbox
         repeating_transaction_checkbox = transaction_form.find_element_by_id('repeating-transaction-checkbox')
@@ -129,8 +135,12 @@ class FunctionalTest(StaticLiveServerTestCase):
             self.get_first_entry_prompt()
         
         # The balance chart updates
-        
-        
+        # bars = balance_chart.find_elements_by_css_selector('.bar[date="{}"]'.format(date))
+        bars = balance_chart.find_elements_by_css_selector('.bar[date="{}"]'.format(date))
+        self.assertEqual(len(bars), 1)
+        bar = bars[0]
+        self.assertEqual(bar.get_attribute('balance'), INITIAL_BALANCE - 15)
+
         # next week shows the balance as 4329.40, this is true for dates following it also
         # the dates between today and next week show the original balance (inclusive of today, exclusive of next week)
         # the calendar view also shows a new entry on the date for next week

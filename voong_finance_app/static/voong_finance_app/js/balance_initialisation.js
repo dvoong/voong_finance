@@ -6,9 +6,10 @@ var balance_initialisation = {
 	var that = this;
 	that.div = $('#balance-initialisation');
 	that.input = that.div.find('#input');
+	that.date_input = that.div.find('#date');
 	that.submit = that.div.find('#submit-button');
 	that.submit.click(function(){
-	    var data = {balance: parseFloat(that.input.val())};
+	    var data = {balance: parseFloat(that.input.val()), date: that.date_input.val()};
 	    var csrftoken = getCookie('csrftoken');
 	    $.ajaxSetup({
 		beforeSend: function(xhr, settings) {
