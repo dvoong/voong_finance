@@ -26,13 +26,6 @@ var balance_initialisation = {
     initialise_balance_url: '/api/initialise-balance',
 
     success_callback: function(data){
-	var date = data['date'];
-	var balance = data['balance'];
-	var data = {columns: ['date', 'balance'], values: [[date, balance]]}; // change format
-	var start = new Date(new Date(date) - 1 * 24 * 60 * 60 * 1000);
-	var end = new Date(date);
-	end.setDate(end.getDate() + 27);
-	var data = balance_chart.pad_dates(data, start, end) // with padded dates
 	new balance_chart.BalanceChart(data, balance_chart.div_id);
 	var first_transaction_prompt = new transactions.FirstTransactionPrompt();
     }

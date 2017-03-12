@@ -63,9 +63,8 @@ class FunctionalTest(StaticLiveServerTestCase):
 
         # The balance chart shows
         bars = balance_chart.find_elements_by_css_selector('.bar');
-        self.assertEqual(len(bars), 29)
+        self.assertEqual(len(bars), 28)
 
-        self.assertEqual(bars[0].get_attribute('balance'), str(0))
         self.assertEqual(bars[1].get_attribute('balance'), str(INITIAL_BALANCE))
         self.assertEqual(bars[-1].get_attribute('balance'), str(INITIAL_BALANCE))
 

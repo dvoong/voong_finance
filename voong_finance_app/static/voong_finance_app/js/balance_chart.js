@@ -66,7 +66,7 @@ var balance_chart = new function(){
 	    .data(data.values)
 	    .enter().append('rect')
 	    .attr('class', 'bar')
-	    .attr('balance', function(d){return d[1]})
+	    .attr('balance', function(d){console.log(d[1]); return d[1]})
 	    .attr('date', function(d){return d[0]})
 	    .attr('x', function(d){
 		return that.axes.xaxis.call.scale()(
