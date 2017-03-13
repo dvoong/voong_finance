@@ -11,10 +11,11 @@ class Balance(models.Model):
     def recalculate(start, end):
         Balance.objects.filter(date__gte=start).delete()
         transactions = Transaction.objects.filter(date__gte=start, date__lte=end)
-        # try:
-        #     balance = Balance.objects.get(date=start - datetime.timedelta(days=1)).balance
-        # except Balance.DoesNotExist as e:
-        #     balance = 0
+        try:
+            balance = Balance.objects.get(date=start - datetime.timedelta(days=1)).balance
+        except Balance.DoesNotExist as e:
+            balance = 0
+        Balance.calculate_balance(balance, start, end, transactions)
         # for date in [start + datetime.timedelta(days=i) for i in range((end - start).days + 1)]:
         #     for transaction in transactions.filter(date=date):
         #         balance += transaction.size
@@ -23,6 +24,10 @@ class Balance(models.Model):
     # @classmethod
     # def last_entry(cls):
     #     return cls.objects.all().order_by('date').last()
+
+    @classmethod
+    def calculate_balance(cls, balance, start, end):
+        pass
 
 class Transaction(models.Model):
 

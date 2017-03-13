@@ -23,9 +23,17 @@ class TestBalance(TestCase):
         Balance.objects.filter = mock.Mock(return_value=self.filtered)
         self.get_patch = mock.patch('voong_finance_app.models.Balance.objects.get')
         self.get = self.get_patch.start()
-
+        self.calculate_balance_patch = mock.patch('voong_finance_app.models.Balance.calculate_balance')
+        self.calculate_balance = self.calculate_balance_patch.start()
+        self.TransactionPatch = mock.patch('voong_finance_app.models.Transaction')
+        self.Transaction = self.TransactionPatch.start()
+        self.transactions = mock.Mock()
+        self.Transaction.objects.filter = mock.Mock(return_value=self.transactions)
+        
     def tearDown(self):
         self.get_patch.stop()
+        self.calculate_balance_patch.stop()
+        self.TransactionPatch.stop()
         
     def test_deletes_existing_balance_entries_equal_to_and_greater_than_start(self):
 
@@ -40,16 +48,10 @@ class TestBalance(TestCase):
         Balance.objects.filter.assert_called_once_with(date__gte=self.start)
 
     def test_gets_all_transactions_with_date_gte_start(self):
-        TransactionPatch = mock.patch('voong_finance_app.models.Transaction')
-        Transaction = TransactionPatch.start()
-        transactions = mock.Mock()
-        Transaction.objects.filter = mock.Mock(return_value=transactions)
 
         Balance.recalculate(self.start, self.end)
 
-        Transaction.objects.filter.assert_called_once_with(date__gte=self.start, date__lte=self.end)
-        
-        TransactionPatch.stop()
+        self.Transaction.objects.filter.assert_called_once_with(date__gte=self.start, date__lte=self.end)
         
     # def test_creates_balance_entry_for_each_date(self):
 
@@ -71,3 +73,9 @@ class TestBalance(TestCase):
 
         self.get.assert_called_once_with(date=datetime.date(2017, 1, 23))
         
+    def test_if_get_raises_DoesNotExist_error_then_calculate_balance_with_an_initial_balance_of_0(self):
+        self.get.side_effect = Balance.DoesNotExist
+
+        Balance.recalculate(self.start, self.end)
+
+        self.calculate_balance.assert_called_once_with(0, self.start, self.end, self.transactions)
