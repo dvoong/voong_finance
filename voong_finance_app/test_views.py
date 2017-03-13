@@ -62,6 +62,41 @@ class TestTransactionForm(TestCase):
     def setUp(self):
         self.url = '/api/transaction-form'
         self.template_name = 'voong_finance_app/transaction-form.html'
+        self.TransactionPatch = mock.patch('voong_finance_app.views.Transaction')
+        self.Transaction = self.TransactionPatch.start()
+        self.RepeatTransactionPatch = mock.patch('voong_finance_app.views.RepeatTransaction')
+        self.RepeatTransaction = self.RepeatTransactionPatch.start()
+        self.BalancePatch = mock.patch('voong_finance_app.views.Balance')
+        self.Balance = self.BalancePatch.start()
+        self.date = datetime.date(2017, 1, 24)
+        self.end_date = datetime.date(2017, 12, 24)
+        self.post_data = {
+            'type': 0,
+            'description': 'description',
+            'size': 15,
+            'date_year': self.date.year,
+            'date_month': self.date.month,
+            'date_day': self.date.day,
+        }
+        self.repeat_post_data = {
+            'type': 0,
+            'description': 'description',
+            'frequency': 0,
+            'size': 15,
+            'repeats': 'on',
+            'date_year': self.date.year,
+            'date_month': self.date.month,
+            'date_day': self.date.day,
+            'end_date_year': self.end_date.year,
+            'end_date_month': self.end_date.month,
+            'end_date_day': self.end_date.day,
+        }
+        self.post_request = mock.Mock(method='POST', POST=self.post_data)
+
+    def tearDown(self):
+        self.TransactionPatch.stop()
+        self.RepeatTransactionPatch.stop()
+        self.BalancePatch.stop()
 
     def test_url_resolution(self, render, TransactionForm):
         resolver = resolve(self.url)
@@ -69,7 +104,7 @@ class TestTransactionForm(TestCase):
 
     def test_return_rendered_transaction_template(self, render, TransactionForm):
 
-        request = mock.Mock()
+        request = mock.Mock(method='GET')
         expected = mock.Mock()
         render.return_value = expected
 
@@ -79,7 +114,7 @@ class TestTransactionForm(TestCase):
 
     def test_call_render_with_transaction_form_object_in_the_context(self, render, TransactionForm):
 
-        request = mock.Mock()
+        request = mock.Mock(method='GET')
         template_name = self.template_name
         context = {'form': str(TransactionForm.return_value)}
         
@@ -88,6 +123,51 @@ class TestTransactionForm(TestCase):
         render.assert_called_with(request, template_name, context)
 
     def test_called_with_post_then_creates_a_new_transaction_object(self, render, TransactionForm):
-        # creates a transaction object
-        # calculates the balance from the transaction_date till the latest date
-        self.assertTrue(False, 'todo')
+        
+        views.transaction_form(self.post_request)
+        
+        self.assertEqual(self.Transaction.objects.create.called, True)
+
+    def test_if_repeat_not_in_data_then_creates_one_transaction(self, render, TransactionForm):
+
+        views.transaction_form(self.post_request)
+
+        self.Transaction.objects.create.assert_called_with(type=self.post_data['type'],
+                                                           description=self.post_data['description'],
+                                                           date=self.date,
+                                                           size=self.post_data['size'])
+        
+    def test_if_repeat_is_on_then_creates_a_repeat_transaction_object(self, render, TransactionForm):
+        post_data = self.repeat_post_data
+        self.post_request.POST = post_data
+
+        views.transaction_form(self.post_request)
+
+        self.RepeatTransaction.assert_called_with(date=self.date,
+                                                  type=post_data['type'],
+                                                  description=post_data['description'],
+                                                  size=post_data['size'],
+                                                  frequency=post_data['frequency'],
+                                                  end_date=self.end_date)
+
+    def test_if_repeat_is_on_then_creates_transactions_up_to_the_latest_balance_entry(self, render, TransactionForm):
+        repeat_transaction = mock.Mock()
+        last_entry = mock.Mock()
+        self.post_request.POST = self.repeat_post_data
+        self.RepeatTransaction.return_value = repeat_transaction
+        self.Balance.last_entry.return_value = last_entry
+
+        views.transaction_form(self.post_request)
+
+        repeat_transaction.create_transactions.assert_called_with(repeat_transaction.date, last_entry.date)
+
+    def test_recalculates_balances_from_start_date_up_to_the_latest_balance_entry(self, render, TransactionForm):
+
+        views.transaction_form(self.post_request)
+
+        self.Balance.recalculate.assert_called_once_with(datetime.date(2017, 1, 24), self.Balance.last_entry().date)
+
+    def test_if_repeats_is_false_then_dont_create_repeat_transaction(self, render, TransactionForm):
+        views.transaction_form(self.post_request)
+
+        self.RepeatTransaction.assert_not_called()
