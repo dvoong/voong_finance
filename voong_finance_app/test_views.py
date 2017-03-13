@@ -171,3 +171,10 @@ class TestTransactionForm(TestCase):
         views.transaction_form(self.post_request)
 
         self.RepeatTransaction.assert_not_called()
+
+
+class TestTransactionFormIntegration(TestCase):
+
+    def test(self):
+
+        self.assertTrue(False, 'TODO: test post calls does what we want')
