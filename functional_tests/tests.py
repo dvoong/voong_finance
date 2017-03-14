@@ -123,7 +123,7 @@ class FunctionalTest(StaticLiveServerTestCase):
         
         # david enters the amount as 15 GBP
         transaction_size_input = transaction_form.find_element_by_id('transaction-size-input')
-        transaction_size_input.send_keys(15) #TODO: input validation
+        transaction_size_input.send_keys(15)
         
         # david clicks the create transaction button
         create_transaction_btn = transaction_form.find_element_by_id('create-transaction-btn')
@@ -135,12 +135,20 @@ class FunctionalTest(StaticLiveServerTestCase):
         
         # The balance chart updates
         # bars = balance_chart.find_elements_by_css_selector('.bar[date="{}"]'.format(date))
-        bars = balance_chart.find_elements_by_css_selector('.bar[date="{}"]'.format(date))
-        self.assertEqual(len(bars), 1)
+        bars = balance_chart.find_elements_by_css_selector('.bar')
+        bar = [bar for bar in bars if bar.get_attribute('date') == date.isoformat()]
+        self.assertEqual(len(bar), 1)
         bar = bars[0]
         self.assertEqual(bar.get_attribute('balance'), INITIAL_BALANCE - 15)
         # ui needs to update the chart with new date send back by the transaction form
         # transaction form view needs to return data. From today to 4 weeks ahead
+
+        # the range of dates should be unchanged
+        bars[0].get_attribute('date') == self.today.isoformat()
+        bars[0].get_attribute('balance') == INITIAL_BALANCE
+        self.assertEqual(len(bars), 28)
+        bars[-1].get_attribute('date') == (self.today() + datetime.timedelta(days=27)).isoformat()
+        bars[-1].get_attribute('balance') == INITIAL_BALANCE - 15
 
         # next week shows the balance as 4329.40, this is true for dates following it also
         # the dates between today and next week show the original balance (inclusive of today, exclusive of next week)

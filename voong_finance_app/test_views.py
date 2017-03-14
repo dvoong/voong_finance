@@ -203,4 +203,3 @@ class TestTransactionFormIntegration(TestCase):
 
         response = self.client.post('/api/transaction-form', data)
         
-        self.assertTrue(False, 'TODO: test post calls does what we want')
