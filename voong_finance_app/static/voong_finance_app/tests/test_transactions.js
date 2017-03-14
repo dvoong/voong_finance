@@ -138,3 +138,16 @@ QUnit.test('hide/remove the form', function(assert){
 
     assert.equal($('#transaction-form').length, 0);
 });
+
+QUnit.test('test calls BalanceChart.update_data with success data', function(assert){
+
+    transactions.on_successful_submission(this.response);
+
+    assert.ok(false, 'TODO');
+});
+
+QUnit.module('update_data', {});
+
+Qunit.test('test', function(assert){
+    assert.ok(false, 'TODO');
+});

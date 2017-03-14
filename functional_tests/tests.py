@@ -141,6 +141,7 @@ class FunctionalTest(StaticLiveServerTestCase):
         bar = bars[0]
         self.assertEqual(bar.get_attribute('balance'), INITIAL_BALANCE - 15)
         # ui needs to update the chart with new date send back by the transaction form
+        # see page 143 in d3 book
         # transaction form view needs to return data. From today to 4 weeks ahead
 
         # the range of dates should be unchanged
