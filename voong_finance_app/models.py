@@ -21,12 +21,12 @@ class Balance(models.Model):
         #         balance += transaction.size
         #     Balance.objects.create(date=date, balance=balance)
 
-    # @classmethod
-    # def last_entry(cls):
-    #     return cls.objects.all().order_by('date').last()
+    @classmethod
+    def last_entry(cls):
+        return cls.objects.all().order_by('date').last()
 
     @classmethod
-    def calculate_balance(cls, balance, start, end):
+    def calculate_balance(cls, balance, start, end, transactions):
         pass
 
 class Transaction(models.Model):

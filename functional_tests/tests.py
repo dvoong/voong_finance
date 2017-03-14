@@ -100,7 +100,7 @@ class FunctionalTest(StaticLiveServerTestCase):
         
         # david types name as phone bill
         transaction_description = transaction_form.find_element_by_id('transaction-description')
-        transaction_description.send_keys('Phone Bill')
+        transaction_description.send_keys('New Phone')
         
         # david sets the date to next week
         date = self.today + datetime.timedelta(days=7)
@@ -114,8 +114,8 @@ class FunctionalTest(StaticLiveServerTestCase):
         day_selector.send_keys(self.today.day)
         
         # david ticks the "transaction repeats" checkbox
-        repeating_transaction_checkbox = transaction_form.find_element_by_id('repeating-transaction-checkbox')
-        repeating_transaction_checkbox.click()
+        # repeating_transaction_checkbox = transaction_form.find_element_by_id('repeating-transaction-checkbox')
+        # repeating_transaction_checkbox.click()
         
         # david selects "repeats monthly"
         repeat_frequency_dropdown = transaction_form.find_element_by_id('repeat-frequency-dropdown')
@@ -139,6 +139,8 @@ class FunctionalTest(StaticLiveServerTestCase):
         self.assertEqual(len(bars), 1)
         bar = bars[0]
         self.assertEqual(bar.get_attribute('balance'), INITIAL_BALANCE - 15)
+        # ui needs to update the chart with new date send back by the transaction form
+        # transaction form view needs to return data. From today to 4 weeks ahead
 
         # next week shows the balance as 4329.40, this is true for dates following it also
         # the dates between today and next week show the original balance (inclusive of today, exclusive of next week)

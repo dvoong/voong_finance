@@ -79,3 +79,38 @@ class TestBalance(TestCase):
         Balance.recalculate(self.start, self.end)
 
         self.calculate_balance.assert_called_once_with(0, self.start, self.end, self.transactions)
+
+
+class TestBalanceLastEntry(TestCase):
+
+    def setUp(self):
+        pass
+
+    # returns the last entry
+    # when empty returns None
+    
+    def test_returns_last_entry(self):
+        entry = Balance.objects.create(date=datetime.date(2017, 1, 24),
+                                       balance=10)
+        
+        last_entry = Balance.last_entry()
+
+        self.assertEqual(entry, last_entry)
+
+    
+    def test_returns_last_entry_when_there_are_multiple_entries(self):
+        entry1 = Balance.objects.create(date=datetime.date(2017, 1, 24),
+                                        balance=10)
+
+        entry2 = Balance.objects.create(date=datetime.date(2017, 1, 27),
+                                        balance=10)
+        
+        last_entry = Balance.last_entry()
+    
+        self.assertEqual(entry2, last_entry)
+
+    def test_when_there_are_no_balance_entries_return_none(self):
+        last_entry = Balance.last_entry()
+
+        self.assertEqual(None, last_entry)
+        

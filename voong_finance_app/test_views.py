@@ -2,7 +2,7 @@ import datetime
 import json
 from datetime import date
 from unittest import mock
-from django.test import TestCase
+from django.test import TestCase, Client
 from django.urls import resolve
 from .views import initialise_balance, transaction_form
 from voong_finance_app import  views
@@ -172,9 +172,35 @@ class TestTransactionForm(TestCase):
 
         self.RepeatTransaction.assert_not_called()
 
+    def test_if_there_is_no_last_entry_then_recalculate_to_four_weeks_from_today(self, render, TransactionForm):
+        today = datetime.date(2017, 3, 1)
+        patch = mock.patch('voong_finance_app.views.datetime.date')
+        date = patch.start()
+        date.today = mock.Mock(return_value=today)
+        self.Balance.last_entry.return_value = None
+        
+        views.transaction_form(self.post_request)
+
+        self.Balance.recalculate.assert_called_with(datetime.date(2017, 1, 24), today + datetime.timedelta(days=28))
+        patch.stop()
 
 class TestTransactionFormIntegration(TestCase):
 
+    def setUp(self):
+
+        self.client = Client()
+
     def test(self):
 
+        data = {
+            'date_year': 2017,
+            'date_month': 1,
+            'date_day': 24,
+            'description': 'description',
+            'type': 0,
+            'size': 10
+        }
+
+        response = self.client.post('/api/transaction-form', data)
+        
         self.assertTrue(False, 'TODO: test post calls does what we want')

@@ -51,6 +51,8 @@ def transaction_form(request):
                                             end_date=end_date)
 
             transaction.create_transactions(transaction.date, Balance.last_entry().date)
-        
-        Balance.recalculate(date, Balance.last_entry().date)
+
+        last_entry = Balance.last_entry()
+        end = last_entry.date if last_entry else datetime.date.today() + datetime.timedelta(days=28)
+        Balance.recalculate(date, end)
         return JsonResponse({'status': 200})
