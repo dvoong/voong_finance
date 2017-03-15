@@ -92,11 +92,14 @@ class TestTransactionForm(TestCase):
             'end_date_day': self.end_date.day,
         }
         self.post_request = mock.Mock(method='POST', POST=self.post_data)
+        self.JsonResponse_patch = mock.patch('voong_finance_app.views.JsonResponse')
+        self.JsonResponse = self.JsonResponse_patch.start()
 
     def tearDown(self):
         self.TransactionPatch.stop()
         self.RepeatTransactionPatch.stop()
         self.BalancePatch.stop()
+        self.JsonResponse_patch.stop()
 
     def test_url_resolution(self, render, TransactionForm):
         resolver = resolve(self.url)
@@ -198,8 +201,16 @@ class TestTransactionFormIntegration(TestCase):
             'date_day': 24,
             'description': 'description',
             'type': 0,
-            'size': 10
+            'size': 10,
+            'chart_date_start': '2017-01-21',
+            'chart_date_end': '2017-02-17'
         }
 
         response = self.client.post('/api/transaction-form', data)
-        
+        response = response.json()
+
+        self.assertEqual(response['columns'], ['date', 'balance'])
+        self.assertEqual(response['values'][0][0], '2017-01-21')
+        self.assertEqual(response['values'][0][1], 0)
+        self.assertEqual(response['values'][-1][0], '2017-02-17')
+        self.assertEqual(response['values'][-1][1], -10)

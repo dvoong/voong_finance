@@ -149,7 +149,7 @@ class FunctionalTest(StaticLiveServerTestCase):
         bars[0].get_attribute('balance') == INITIAL_BALANCE
         self.assertEqual(len(bars), 28)
         bars[-1].get_attribute('date') == (self.today() + datetime.timedelta(days=27)).isoformat()
-        bars[-1].get_attribute('balance') == INITIAL_BALANCE - 15
+        bars[-1].get_attribute('balance') == str(INITIAL_BALANCE - 15)
 
         # next week shows the balance as 4329.40, this is true for dates following it also
         # the dates between today and next week show the original balance (inclusive of today, exclusive of next week)

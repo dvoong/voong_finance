@@ -1,5 +1,7 @@
 import datetime
 from django.db import models
+from django.db.models import Sum
+from voong_finance_app.utils import date_range
 
 # Create your models here.
 class Balance(models.Model):
@@ -7,27 +9,25 @@ class Balance(models.Model):
     date = models.DateField(null=True)
     balance = models.FloatField(null=True)
 
-    @staticmethod
-    def recalculate(start, end):
-        Balance.objects.filter(date__gte=start).delete()
-        transactions = Transaction.objects.filter(date__gte=start, date__lte=end)
-        try:
-            balance = Balance.objects.get(date=start - datetime.timedelta(days=1)).balance
-        except Balance.DoesNotExist as e:
-            balance = 0
-        Balance.calculate_balance(balance, start, end, transactions)
-        # for date in [start + datetime.timedelta(days=i) for i in range((end - start).days + 1)]:
-        #     for transaction in transactions.filter(date=date):
-        #         balance += transaction.size
-        #     Balance.objects.create(date=date, balance=balance)
+    @classmethod
+    def recalculate(cls, start, end):
+        cls.objects.filter(date__gte=start).delete()
+        dates = date_range(start, end)
+        last_entry = Balance.last_entry()
+        balance = last_entry.balance if last_entry != None else 0
+        return cls.calculate_balances({}, balance, dates)
 
     @classmethod
     def last_entry(cls):
         return cls.objects.all().order_by('date').last()
 
     @classmethod
-    def calculate_balance(cls, balance, start, end, transactions):
-        pass
+    def calculate_balances(cls, output, initial_balance, dates):
+        if len(dates) == 0:
+            return output
+        initial_balance += Transaction.objects.filter(date=dates[0]).aggregate(Sum('balance'))
+        output['values'].append([dates[0].isoformat(), initial_balance])
+        return cls.calculate_balances(output, initial_balance, dates[1:])
 
 class Transaction(models.Model):
 

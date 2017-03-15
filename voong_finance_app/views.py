@@ -54,5 +54,5 @@ def transaction_form(request):
 
         last_entry = Balance.last_entry()
         end = last_entry.date if last_entry else datetime.date.today() + datetime.timedelta(days=28)
-        Balance.recalculate(date, end)
-        return JsonResponse({'status': 200})
+        response = Balance.recalculate(date, end)
+        return JsonResponse(response)
