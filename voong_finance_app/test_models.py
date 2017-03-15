@@ -42,6 +42,7 @@ class TestBalanceRecalculate(TestCase):
         self.filter_patch.stop()
         self.calculate_balances_patch.stop()
         self.last_entry_patch.stop()
+        self.date_range_patch.stop()
         
     def test_filters_all_balance_entries_on_and_after_the_start_date(self):
         
