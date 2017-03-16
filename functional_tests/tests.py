@@ -8,6 +8,7 @@ from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.support.ui import Select
+from selenium.webdriver.support import expected_conditions as EC
 
 from django.test import LiveServerTestCase
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
@@ -107,11 +108,11 @@ class FunctionalTest(StaticLiveServerTestCase):
         # date_selector = transaction_form.find_element_by_id('date-selector')
         # date_selector.send_keys((self.today + datetime.timedelta(days=7)).isoformat())
         year_selector = transaction_form.find_element_by_id('date-selector_year');
-        year_selector.send_keys(self.today.year)
+        year_selector.send_keys(date.year)
         month_selector = transaction_form.find_element_by_id('date-selector_month');
-        month_selector.send_keys(self.today.month)
+        month_selector.send_keys(date.month)
         day_selector = transaction_form.find_element_by_id('date-selector_day');
-        day_selector.send_keys(self.today.day)
+        day_selector.send_keys(date.day)
         
         # david ticks the "transaction repeats" checkbox
         # repeating_transaction_checkbox = transaction_form.find_element_by_id('repeating-transaction-checkbox')
@@ -123,15 +124,14 @@ class FunctionalTest(StaticLiveServerTestCase):
         
         # david enters the amount as 15 GBP
         transaction_size_input = transaction_form.find_element_by_id('transaction-size-input')
-        transaction_size_input.send_keys(15)
+        transaction_size_input.send_keys('719.99')
         
         # david clicks the create transaction button
         create_transaction_btn = transaction_form.find_element_by_id('create-transaction-btn')
         create_transaction_btn.click()
 
         # the first transaction prompt disappears
-        with self.assertRaises(NoSuchElementException):
-            self.get_first_entry_prompt()
+        WebDriverWait(self.browser, 5).until_not(EC.presence_of_element_located(('id', 'first-entry-prompt')))
         
         # The balance chart updates
         # bars = balance_chart.find_elements_by_css_selector('.bar[date="{}"]'.format(date))
@@ -149,7 +149,7 @@ class FunctionalTest(StaticLiveServerTestCase):
         bars[0].get_attribute('balance') == INITIAL_BALANCE
         self.assertEqual(len(bars), 28)
         bars[-1].get_attribute('date') == (self.today() + datetime.timedelta(days=27)).isoformat()
-        bars[-1].get_attribute('balance') == str(INITIAL_BALANCE - 15)
+        bars[-1].get_attribute('balance') == str(INITIAL_BALANCE - 719.99)
 
         # next week shows the balance as 4329.40, this is true for dates following it also
         # the dates between today and next week show the original balance (inclusive of today, exclusive of next week)
