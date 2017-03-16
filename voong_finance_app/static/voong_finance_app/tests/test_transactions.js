@@ -77,7 +77,7 @@ QUnit.test('makes ajax post call', function(assert){
 
 });
 
-QUnit.test('returns false', function(assert){
+QUnit.test('form returns false, i.e. it overrides default form submission', function(assert){
     var response = transactions.submit_form();
     assert.equal(response, false);
 });
@@ -146,8 +146,8 @@ QUnit.test('test calls BalanceChart.update_data with success data', function(ass
     assert.ok(false, 'TODO');
 });
 
-QUnit.module('update_data', {});
+// QUnit.module('update_data', {});
 
-Qunit.test('test', function(assert){
-    assert.ok(false, 'TODO');
-});
+// Qunit.test('test', function(assert){
+//     assert.ok(false, 'TODO');
+// });

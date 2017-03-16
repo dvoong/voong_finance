@@ -21,6 +21,8 @@ var transactions = new function(){
 	     	obj[item.name] = item.value;
 	     	return obj;
 	    }, {})
+	form_data.chart_date_start = $($('#balance-chart').find('.bar')[0]).attr('date')
+	form_data.chart_date_end = $($('#balance-chart').find('.bar')[0]).attr('date')
 	return form_data;
     };
     
