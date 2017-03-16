@@ -214,3 +214,5 @@ class TestTransactionFormIntegration(TestCase):
         self.assertEqual(response['values'][0][1], 0)
         self.assertEqual(response['values'][-1][0], '2017-02-17')
         self.assertEqual(response['values'][-1][1], -10)
+
+print('test_views')        

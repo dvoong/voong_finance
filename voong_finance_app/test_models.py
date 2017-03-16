@@ -78,14 +78,14 @@ class TestBalanceRecalculate(TestCase):
 
         balances = Balance.recalculate(self.start, self.end)
 
-        self.calculate_balances.assert_called_once_with({}, self.last_entry.return_value.balance, self.date_range.return_value)
+        self.calculate_balances.assert_called_once_with({'columns': ['date', 'balance'], 'values': []}, self.last_entry.return_value.balance, self.date_range.return_value)
 
     def test_if_last_entry_does_not_exist_call_calulate_balances_with_its_balance(self):
         self.last_entry.return_value = None
 
         balances = Balance.recalculate(self.start, self.end)
 
-        self.calculate_balances.assert_called_once_with({}, 0, self.date_range.return_value)
+        self.calculate_balances.assert_called_once_with({'columns': ['date', 'balance'], 'values': []}, 0, self.date_range.return_value)
 
         
 class TestBalanceLastEntry(TestCase):
@@ -137,8 +137,8 @@ class TestBalanceCalculateBalances(TestCase):
         self.Sum = self.Sum_patch.start()
 
     def tearDown(self):
-        self.Transaction.stop()
-        self.Sum.stop()
+        self.Transaction_patch.stop()
+        self.Sum_patch.stop()
 
     def test_if_the_number_of_dates_is_0_then_return_the_output(self):
 
@@ -155,24 +155,39 @@ class TestBalanceCalculateBalances(TestCase):
         input = {'columns': ['date', 'balance'], 'values': [['2017-02-28', 7]]}
         initial_balance = 7
         dates = [datetime.date(2017, 3, 1), datetime.date(2017, 3, 2)]
+        transactions = mock.Mock(__len__=mock.Mock(return_value=1))
+        self.Transaction.objects.filter.return_value = transactions
+        transactions.aggregate.return_value = {'size__sum': -4}
         
         output = Balance.calculate_balances(input, initial_balance, dates)
 
         self.Transaction.objects.filter.assert_called_with(date=dates[1])
         self.assertEqual(self.Transaction.objects.filter.call_count, 2)
-        self.Transaction.objects.filter.return_value.aggregate.assert_called_with(self.Sum.return_value)
-        self.Sum.assert_called_with('balance')
+        transactions.aggregate.assert_called_with(self.Sum.return_value)
+        self.Sum.assert_called_with('size')
 
     def test_add_the_balance_to_the_output(self):
 
         input = {'columns': ['date', 'balance'], 'values': [['2017-02-28', 7]]}
         initial_balance = 7
         dates = [datetime.date(2017, 3, 1)]
-        self.Transaction.objects.filter.return_value.aggregate.return_value = -4
+        transactions = mock.Mock(__len__=mock.Mock(return_value=1))
+        self.Transaction.objects.filter.return_value = transactions
+        transactions.aggregate.return_value = {'size__sum': -4}
         
         output = Balance.calculate_balances(input, initial_balance, dates)
 
         self.assertEqual(output['values'][1][0], '2017-03-01')
         self.assertEqual(output['values'][1][1], 3)
 
-    
+    # def test_if_there_are_no_transactions_add_0_to_the_initial_balance(self):
+    #     input = {'columns': ['date', 'balance'], 'values': [['2017-02-28', 7]]}
+    #     initial_balance = 7
+    #     dates = [datetime.date(2017, 3, 1)]
+    #     self.Transaction.objects.filter.return_value = []
+    #     patch = mock.patch('voong_finance_app.models.Balance.calculate_balances')
+    #     calculate_balances = patch.start()
+
+    #     output = Balance.calculate_balances(input, initial_balance, dates)
+
+    #     patch.stop()

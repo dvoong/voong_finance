@@ -1,2 +1,4 @@
+import datetime
+
 def date_range(start, end):
-    pass
+    return [start + datetime.timedelta(days=i) for i in range((end - start).days)]

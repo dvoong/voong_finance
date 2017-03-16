@@ -15,7 +15,8 @@ class Balance(models.Model):
         dates = date_range(start, end)
         last_entry = Balance.last_entry()
         balance = last_entry.balance if last_entry != None else 0
-        return cls.calculate_balances({}, balance, dates)
+        output = cls.calculate_balances({'columns': ['date', 'balance'], 'values': []}, balance, dates)
+        return output
 
     @classmethod
     def last_entry(cls):
@@ -25,7 +26,9 @@ class Balance(models.Model):
     def calculate_balances(cls, output, initial_balance, dates):
         if len(dates) == 0:
             return output
-        initial_balance += Transaction.objects.filter(date=dates[0]).aggregate(Sum('balance'))
+        transactions = Transaction.objects.filter(date=dates[0])
+        if len(transactions):
+            initial_balance += transactions.aggregate(Sum('size'))['size__sum']
         output['values'].append([dates[0].isoformat(), initial_balance])
         return cls.calculate_balances(output, initial_balance, dates[1:])
 
