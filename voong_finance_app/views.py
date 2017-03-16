@@ -34,10 +34,15 @@ def transaction_form(request):
         day = int(request.POST['date_day'])
         date = datetime.date(year, month, day)
         if 'repeats' not in request.POST:
+            transaction_type = int(request.POST['type'])
+            size = abs(float(request.POST['size']))
+            if transaction_type == 0:
+                size *= -1
+                
             Transaction.objects.create(date=date,
                                        description=request.POST['description'],
-                                       type=request.POST['type'],
-                                       size=float(request.POST['size']))
+                                       type=transaction_type,
+                                       size=size)
         else:
             year = request.POST['end_date_year']
             month = request.POST['end_date_month']
@@ -52,7 +57,6 @@ def transaction_form(request):
 
             transaction.create_transactions(transaction.date, Balance.last_entry().date)
 
-        last_entry = Balance.last_entry()
-        end = last_entry.date if last_entry else datetime.date.today() + datetime.timedelta(days=28)
-        response = Balance.recalculate(date, end)
+        end = datetime.datetime.strptime(request.POST['chart_date_end'], '%Y-%m-%d').date()
+        response = Balance.recalculate(date, end + datetime.timedelta(days=1))
         return JsonResponse(response)

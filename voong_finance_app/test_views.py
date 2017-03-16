@@ -77,6 +77,8 @@ class TestTransactionForm(TestCase):
             'date_year': self.date.year,
             'date_month': self.date.month,
             'date_day': self.date.day,
+            'chart_date_start': '2017-01-21',
+            'chart_date_end': '2017-02-17',
         }
         self.repeat_post_data = {
             'type': 0,
@@ -90,6 +92,8 @@ class TestTransactionForm(TestCase):
             'end_date_year': self.end_date.year,
             'end_date_month': self.end_date.month,
             'end_date_day': self.end_date.day,
+            'chart_date_start': '2017-01-21',
+            'chart_date_end': '2017-02-17',
         }
         self.post_request = mock.Mock(method='POST', POST=self.post_data)
         self.JsonResponse_patch = mock.patch('voong_finance_app.views.JsonResponse')
@@ -138,7 +142,7 @@ class TestTransactionForm(TestCase):
         self.Transaction.objects.create.assert_called_with(type=self.post_data['type'],
                                                            description=self.post_data['description'],
                                                            date=self.date,
-                                                           size=self.post_data['size'])
+                                                           size=-1 * self.post_data['size'])
         
     def test_if_repeat_is_on_then_creates_a_repeat_transaction_object(self, render, TransactionForm):
         post_data = self.repeat_post_data
@@ -164,28 +168,17 @@ class TestTransactionForm(TestCase):
 
         repeat_transaction.create_transactions.assert_called_with(repeat_transaction.date, last_entry.date)
 
-    def test_recalculates_balances_from_start_date_up_to_the_latest_balance_entry(self, render, TransactionForm):
+    ####
+    def test_recalculates_balances_from_transaction_date_to_the_end_of_the_chart_range(self, render, TransactionForm):
 
         views.transaction_form(self.post_request)
 
-        self.Balance.recalculate.assert_called_once_with(datetime.date(2017, 1, 24), self.Balance.last_entry().date)
+        self.Balance.recalculate.assert_called_once_with(datetime.date(2017, 1, 24), datetime.date(2017, 2, 18))
 
     def test_if_repeats_is_false_then_dont_create_repeat_transaction(self, render, TransactionForm):
         views.transaction_form(self.post_request)
 
         self.RepeatTransaction.assert_not_called()
-
-    def test_if_there_is_no_last_entry_then_recalculate_to_four_weeks_from_today(self, render, TransactionForm):
-        today = datetime.date(2017, 3, 1)
-        patch = mock.patch('voong_finance_app.views.datetime.date')
-        date = patch.start()
-        date.today = mock.Mock(return_value=today)
-        self.Balance.last_entry.return_value = None
-        
-        views.transaction_form(self.post_request)
-
-        self.Balance.recalculate.assert_called_with(datetime.date(2017, 1, 24), today + datetime.timedelta(days=28))
-        patch.stop()
 
 class TestTransactionFormIntegration(TestCase):
 
@@ -210,8 +203,8 @@ class TestTransactionFormIntegration(TestCase):
         response = response.json()
 
         self.assertEqual(response['columns'], ['date', 'balance'])
-        self.assertEqual(response['values'][0][0], '2017-01-21')
-        self.assertEqual(response['values'][0][1], 0)
+        self.assertEqual(response['values'][0][0], '2017-01-24')
+        self.assertEqual(response['values'][0][1], -10)
         self.assertEqual(response['values'][-1][0], '2017-02-17')
         self.assertEqual(response['values'][-1][1], -10)
 
