@@ -2,9 +2,11 @@ console.log("balance-chart.js");
 
 var balance_chart = new function(){
     var that = this;
+
+    this.div_id = 'balance-chart'
     
     this.BalanceChart = function (data, div_id, width, height, margin){
-	this.div_id = div_id !== undefined ? div_id : 'balance-chart';
+	this.div_id = div_id !== undefined ? div_id : that.div_id;
 	this.height = height !== undefined ? height: 300 ;
 	this.width = width !== undefined ? width : 1200;
 	this.margin = margin !== undefined ? margin : {top: 20, right: 20, bottom: 70, left: 40};
@@ -140,7 +142,7 @@ var balance_chart = new function(){
 	    date_string = date.getDate() + ' ' + date.toLocaleString('en-GB', { month: "short" })
 	    return date_string;
 	}
-    }
+    };
 
     this.label_axis = function(axis, label, x, y){
 	axis.append('g')
@@ -153,6 +155,67 @@ var balance_chart = new function(){
 
     this.Axis = function(call){
 	this.call = call;
-    }
+    };
+
+    this.update_data = function(data){
+	// console.log(data);
+	// console.log(data.values);
+	// console.log(data.values[0]);
+	var start = new Date(data.values[0][0]);
+	var end = new Date(data.values[data.values.length - 1][0]);
+	var chart = d3.select('#' + that.div_id);
+	// console.log(that.div_id)
+	// console.log(d3.select('#' + that.div_id));
+	var svg = chart.select('svg');
+	var bars = svg.selectAll('.bar').nodes();
+	var filtered_bars = []
+	
+	for(var i=0; i<bars.length; i++){
+	    var bar = $(bars[i]);
+	    date = new Date(bar.attr('date'))
+	    if(date >= start & date <= end)
+		filtered_bars.push(bar.get(0))
+	}
+	/// console.log(bars);
+	//     .data(data)
+	//     .transition()
+	//     .attr('y', function(d){})
+	//     .attr('
+	    // .data(data)
+	// .transition()
+	//var bars = svg.selectAll('.bar')
+	//console.log('bars');
+	//console.log(bars);
+	//bars.attr('y', function(d){15});
+	//bars.attr('y', function(d){15});
+
+	// console.log(filtered_bars);
+	// console.log($(filtered_bars));
+	// console.log(d3.select(filtered_bars));
+	d3.selectAll(filtered_bars)
+	    .data(data.values)
+	    .transition()
+	    .attr('y', function(d){
+		// console.log('changing y');d
+		// console.log('this:', this);
+	    //console.log(this.attr('balance'));
+		var new_val = _chart.axes.yaxis.call.scale()(d[1]);
+		// console.log('d:' + d);
+		// console.log('d[1]:' + d);
+		// console.log(_chart.axes.yaxis.call.scale()(d[1] - 20));
+		// console.log('new_val:', new_val)
+		return new_val;
+	    })
+	    .attr('height', function(d){
+		var new_height = _chart.canvas.height - _chart.canvas.margin.bottom - _chart.axes.yaxis.call.scale()(d[1]);
+		// console.log('new_height:' + new_height);
+		return new_height;
+	    });
+	//d3.selectAll(filtered_bars).attr('y', function(d){10000});
+	// .attr('y', function(d){return that.axes.yaxis.call.scale()(d[1]);})
+	// .attr('height', function(d){return canvas.height - canvas.margin.bottom - that.axes.yaxis.call.scale()(d[1])});
+
+	// console.log(_chart);
+    };
 
 }

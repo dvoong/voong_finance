@@ -21,15 +21,18 @@ var transactions = new function(){
 	     	obj[item.name] = item.value;
 	     	return obj;
 	    }, {})
-	form_data.chart_date_start = $($('#balance-chart').find('.bar')[0]).attr('date')
-	form_data.chart_date_end = $($('#balance-chart').find('.bar')[0]).attr('date')
+
+	var bars = $('#balance-chart').find('.bar')
+	form_data.chart_date_start = $(bars[0]).attr('date')
+	form_data.chart_date_end = $(bars[bars.length - 1]).attr('date')
 	return form_data;
     };
     
 
-    this.on_successful_submission = function(){
+    this.on_successful_submission = function(data){
 	$('#transaction-form').remove();
 	$('#first-entry-prompt').remove();
+	balance_chart.update_data(data);
     };
 
     this.submit_form = function(){

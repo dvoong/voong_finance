@@ -329,3 +329,11 @@ QUnit.test('something', function(assert){
     assert.equal(xaxis.select('text').text(), 'Date');
     
 });
+
+QUnit.module('update_data', {
+    beforeEach: function(){},
+});
+
+QUnit.test('todo', function(assert){
+    assert.ok(true);
+});

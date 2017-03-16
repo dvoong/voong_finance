@@ -26,7 +26,7 @@ var balance_initialisation = {
     initialise_balance_url: '/api/initialise-balance',
 
     success_callback: function(data){
-	new balance_chart.BalanceChart(data, balance_chart.div_id);
+	_chart = new balance_chart.BalanceChart(data, balance_chart.div_id);
 	var first_transaction_prompt = new transactions.FirstTransactionPrompt();
     }
     

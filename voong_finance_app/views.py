@@ -3,6 +3,7 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from voong_finance_app.forms import TransactionForm
 from voong_finance_app.models import Balance, Transaction, RepeatTransaction
+from voong_finance_app.utils import convert_date_string
 
 # Create your views here.
 def home(request):
@@ -57,6 +58,11 @@ def transaction_form(request):
 
             transaction.create_transactions(transaction.date, Balance.last_entry().date)
 
-        end = datetime.datetime.strptime(request.POST['chart_date_end'], '%Y-%m-%d').date()
+        # untested
+        start = convert_date_string(request.POST['chart_date_start'])
+        end = convert_date_string(request.POST['chart_date_end'])
         response = Balance.recalculate(date, end + datetime.timedelta(days=1))
+        response['values'] = list(filter(lambda x: convert_date_string(x[0]) >= start, response['values']))
+        ##
+        
         return JsonResponse(response)
