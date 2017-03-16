@@ -85,32 +85,8 @@ var balance_chart = new function(){
 	
     };
 
-    this.pad_dates = function(data, start, end){
-	var first_date = new Date(data.values[0][0]);
-	var last_date = new Date(data.values[data.values.length-1][0])
-	var balance = 0;
-	var padded_data = {
-	    columns: data.columns,
-	    values: []
-	};
-
-	for(var i=0; i<=(end - start) / (3600000 * 24); i++){
-	    var date = new Date(start);
-	    date.setDate(date.getDate() + i);
-	    var date_string = date.toISOString().split('T')[0];
-	    if(date >= first_date && date <= last_date){
-		balance = balance_chart.get_balance(date_string, data);
-	    }
-	    padded_data.values.push([date_string, balance]);
-	}
-	return padded_data;
-    };
-
-    this.get_balance = function(date, data){
-	for(var i=0; i<data.values.length; i++){
-	    if(data.values[i][0] == date)
-		return data.values[i][1];
-	}
+    this.get_balance = function(d){
+	return d[1];
     };
 
     this.dates = function(data){
@@ -158,64 +134,41 @@ var balance_chart = new function(){
     };
 
     this.update_data = function(data){
-	// console.log(data);
-	// console.log(data.values);
-	// console.log(data.values[0]);
-	var start = new Date(data.values[0][0]);
-	var end = new Date(data.values[data.values.length - 1][0]);
-	var chart = d3.select('#' + that.div_id);
-	// console.log(that.div_id)
-	// console.log(d3.select('#' + that.div_id));
-	var svg = chart.select('svg');
-	var bars = svg.selectAll('.bar').nodes();
-	var filtered_bars = []
-	
-	for(var i=0; i<bars.length; i++){
-	    var bar = $(bars[i]);
-	    date = new Date(bar.attr('date'))
-	    if(date >= start & date <= end)
-		filtered_bars.push(bar.get(0))
-	}
-	/// console.log(bars);
-	//     .data(data)
-	//     .transition()
-	//     .attr('y', function(d){})
-	//     .attr('
-	    // .data(data)
-	// .transition()
-	//var bars = svg.selectAll('.bar')
-	//console.log('bars');
-	//console.log(bars);
-	//bars.attr('y', function(d){15});
-	//bars.attr('y', function(d){15});
-
-	// console.log(filtered_bars);
-	// console.log($(filtered_bars));
-	// console.log(d3.select(filtered_bars));
-	d3.selectAll(filtered_bars)
-	    .data(data.values)
+	var bars = _chart.svg.selectAll('.bar');
+	var filtered_bars = balance_chart.filter_bars_by_date(bars, balance_chart.get_dates(data.values));
+	filtered_bars.data(data.values)
 	    .transition()
-	    .attr('y', function(d){
-		// console.log('changing y');d
-		// console.log('this:', this);
-	    //console.log(this.attr('balance'));
-		var new_val = _chart.axes.yaxis.call.scale()(d[1]);
-		// console.log('d:' + d);
-		// console.log('d[1]:' + d);
-		// console.log(_chart.axes.yaxis.call.scale()(d[1] - 20));
-		// console.log('new_val:', new_val)
-		return new_val;
-	    })
-	    .attr('height', function(d){
-		var new_height = _chart.canvas.height - _chart.canvas.margin.bottom - _chart.axes.yaxis.call.scale()(d[1]);
-		// console.log('new_height:' + new_height);
-		return new_height;
-	    });
-	//d3.selectAll(filtered_bars).attr('y', function(d){10000});
-	// .attr('y', function(d){return that.axes.yaxis.call.scale()(d[1]);})
-	// .attr('height', function(d){return canvas.height - canvas.margin.bottom - that.axes.yaxis.call.scale()(d[1])});
-
-	// console.log(_chart);
+	    .attr('y', balance_chart.get_y)
+	    .attr('height', balance_chart.get_height)
+	    .attr('balance', balance_chart.get_balance);
     };
+
+    this.get_dates = function(values){
+	output = [];
+	for(var i=0; i<values.length; i++){
+	    output.push(values[i][0]);
+	}
+	return output;
+    };
+
+    this.filter_bars_by_date = function(bars, dates){
+	output = []
+	for(var i=0; i<dates.length; i++){
+	    for(var j=0; j<bars.length; j++){
+		if(bars[j].attr('date') == dates[i]){
+		    output.push(dates[i]);
+		    break;
+		}
+	    }
+	}
+	return output;
+    };
+
+    this.get_y = function(d){
+	// balance = balance_chart.get_balance(d);
+	// return chart_.axes.yaxis.call.scale()(balance);
+    };
+
+    this.get_height = function(){};
 
 }

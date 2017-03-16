@@ -9,33 +9,6 @@ QUnit.module("createBalanceChart tests", {
     afterEach: function(){}
 });
 
-QUnit.test('Pad dates', function(assert){
-
-    var data = this.data;
-    var start = new Date(2016, 11, 31);
-    var end = new Date(2017, 0, 4);
-    var get_balance = sinon.stub(balance_chart, 'get_balance');
-    get_balance.onCall(0).returns(10);
-    get_balance.onCall(1).returns(11);
-    
-    padded_data = balance_chart.pad_dates(data, start, end);
-
-    expected = {
-	columns: ['date', 'balance'],
-	values: [
-	    ['2016-12-31', 0],
-	    ['2017-01-01', 10],
-	    ['2017-01-02', 11],
-	    ['2017-01-03', 11],
-	    ['2017-01-04', 11]
-	]
-    }
-    
-    assert.deepEqual(padded_data, expected)
-    get_balance.restore();
-    
-});
-
 QUnit.test('Get dates', function(assert){
     var dates = balance_chart.dates(this.data);
     var expected = [new Date('2017-01-01'), new Date('2017-01-02')]
@@ -275,9 +248,8 @@ QUnit.test('appends g elements for x and y axes', function(assert){
 QUnit.module('get_balance', {});
 
 QUnit.test('test get_balance', function(assert){
-    var date = '2017-01-24';
-    var data = {columns: ['date', 'balance'], values: [['2017-01-24', 10], ['2017-01-25', 22]]};
-    var balance = balance_chart.get_balance(date, data);
+    var data = [['2017-01-24', 10], ['2017-01-25', 22]]
+    var balance = balance_chart.get_balance(data[0]);
 
     assert.equal(balance, 10);
 });
@@ -325,15 +297,121 @@ QUnit.test('something', function(assert){
 
     balance_chart.label_axis(xaxis, 'Date');
 
-    console.log(xaxis);
     assert.equal(xaxis.select('text').text(), 'Date');
     
 });
 
 QUnit.module('update_data', {
-    beforeEach: function(){},
+    beforeEach: function(){
+	this.data = {'columns': ['date', 'balance'], 'values': [['2017-03-01', 10], ['2017-03-02', 20]]};
+	this.bars = [];
+	this.selectAll = sinon.stub(_chart.svg, 'selectAll').returns(this.bars);
+	this.filtered_bars = {transition: function(){}, data: function(){}, attr: function(){}};
+	this.filter_bars_by_date = sinon.stub(balance_chart, 'filter_bars_by_date').returns(this.filtered_bars);
+	this.data_binder = sinon.stub(this.filtered_bars, 'data').returns(this.filtered_bars);
+	this.transition = sinon.stub(this.filtered_bars, 'transition').returns(this.filtered_bars);
+	this.attr = sinon.stub(this.filtered_bars, 'attr');
+	this.attr.returns(this.filtered_bars);
+	this.get_y = sinon.stub(balance_chart, 'get_y');
+	this.get_height = sinon.stub(balance_chart, 'get_height');
+	this.get_balance = sinon.stub(balance_chart, 'get_balance');
+	this.dates = [];
+	this.get_dates = sinon.stub(balance_chart, 'get_dates').returns(this.dates);
+    },
+    afterEach: function(){
+	this.selectAll.restore();
+	this.filter_bars_by_date.restore();
+	this.transition.restore();
+	this.get_y.restore();
+	this.get_height.restore();
+	this.get_balance.restore();
+	this.get_dates.restore();
+    }
 });
 
-QUnit.test('todo', function(assert){
-    assert.ok(true);
+// takes some data
+// gets the bars from the balance_chart
+// filters bars with matching dates to the response
+// rebinds the data to the filtered bars
+// creates a transition from the filtered bars
+// set y attribute using the date from the response and the scale from the balance chart
+// set the height attribute using the balance from the response and scale from the balance chart
+// set the balance attribute of the bar
+
+QUnit.test('gets bars from the balance_chart', function(assert){
+
+    balance_chart.update_data(this.data);
+
+    assert.deepEqual(this.selectAll.firstCall.args, ['.bar']);
+});
+
+QUnit.test('filters_bars_with_matching_dates_to_the_data', function(assert){
+
+    balance_chart.update_data(this.data);
+
+    assert.deepEqual(this.get_dates.firstCall.args, [this.data.values]);
+    assert.deepEqual(this.filter_bars_by_date.firstCall.args, [this.bars, this.dates]);
+});
+
+QUnit.test('rebinds the data to the filtered bars', function(assert){
+
+    balance_chart.update_data(this.data);
+
+    assert.deepEqual(this.data_binder.firstCall.args, [this.data.values]);
+});
+
+QUnit.test('creates transition from filtered bars', function(assert){
+
+    balance_chart.update_data(this.data);
+
+    assert.deepEqual(this.transition.firstCall.args, []);
+});
+
+QUnit.test('set y attribute using the date from the response and the scale from the balance chart', function(assert){
+
+    balance_chart.update_data(this.data);
+
+    assert.deepEqual(this.attr.firstCall.args, ['y', this.get_y]);
+});
+
+QUnit.test('set the height attribute using the balance from the response and scale from the balance chart', function(assert){
+
+    balance_chart.update_data(this.data);
+
+    assert.deepEqual(this.attr.secondCall.args, ['height', this.get_height]);
+});
+
+QUnit.test('set the balance attribute of the bar', function(assert){
+
+    balance_chart.update_data(this.data);
+
+    assert.deepEqual(this.attr.thirdCall.args, ['balance', this.get_balance]);
+    
+});
+
+QUnit.module('get_dates', {});
+
+QUnit.test('get_dates', function(assert){
+    dates = balance_chart.get_dates([['2017-03-02', 10], ['2017-03-03', 11]]);
+
+    assert.deepEqual(dates, ['2017-03-02', '2017-03-03'])
+});
+
+QUnit.module('filter_bars_by_date', {});
+
+QUnit.test('', function(assert){
+    var bars = [{attr: function(date){return '2017-03-01'}},
+		{attr: function(date){return '2017-03-02'}},
+		{attr: function(date){return '2017-03-03'}},
+	       ];
+
+    var expected = ['2017-03-02',
+		    '2017-03-03'
+		   ];
+
+    var dates = ['2017-03-02', '2017-03-03'];
+
+    var output = balance_chart.filter_bars_by_date(bars, dates);
+
+    assert.deepEqual(output, expected);
 });

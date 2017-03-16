@@ -129,7 +129,7 @@ QUnit.module('get_form_data', {
 QUnit.module('on_successful_submission', {
     beforeEach: function(){
 	this.response = {'columns': ['date', 'balance'], 'values': [['2017-03-01', 10], ['2017-03-02', 20]]};
-	this.update_data = sinon.spy(balance_chart, 'update_data');
+	this.update_data = sinon.stub(balance_chart, 'update_data');
     },
 
     afterEach: function(){
@@ -150,9 +150,3 @@ QUnit.test('test calls BalanceChart.update_data with success data', function(ass
 
     assert.deepEqual(this.update_data.firstCall.args, [this.response]);
 });
-
-// QUnit.module('update_data', {});
-
-// Qunit.test('test', function(assert){
-//     assert.ok(false, 'TODO');
-// });
