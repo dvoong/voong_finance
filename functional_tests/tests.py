@@ -138,8 +138,9 @@ class FunctionalTest(StaticLiveServerTestCase):
         bars = balance_chart.find_elements_by_css_selector('.bar')
         bar = [bar for bar in bars if bar.get_attribute('date') == date.isoformat()]
         self.assertEqual(len(bar), 1)
-        bar = bars[0]
-        self.assertEqual(bar.get_attribute('balance'), INITIAL_BALANCE - 15)
+        bar = bar[0]
+        self.assertEqual(bar.get_attribute('balance'), str(INITIAL_BALANCE - 719.99))
+
         # ui needs to update the chart with new date send back by the transaction form
         # see page 143 in d3 book
         # transaction form view needs to return data. From today to 4 weeks ahead
@@ -148,7 +149,7 @@ class FunctionalTest(StaticLiveServerTestCase):
         bars[0].get_attribute('date') == self.today.isoformat()
         bars[0].get_attribute('balance') == INITIAL_BALANCE
         self.assertEqual(len(bars), 28)
-        bars[-1].get_attribute('date') == (self.today() + datetime.timedelta(days=27)).isoformat()
+        bars[-1].get_attribute('date') == (self.today + datetime.timedelta(days=27)).isoformat()
         bars[-1].get_attribute('balance') == str(INITIAL_BALANCE - 719.99)
 
         # next week shows the balance as 4329.40, this is true for dates following it also

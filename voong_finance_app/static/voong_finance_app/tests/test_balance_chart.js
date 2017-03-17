@@ -305,7 +305,7 @@ QUnit.module('update_data', {
     beforeEach: function(){
 	this.data = {'columns': ['date', 'balance'], 'values': [['2017-03-01', 10], ['2017-03-02', 20]]};
 	this.bars = [];
-	this.selectAll = sinon.stub(_chart.svg, 'selectAll').returns(this.bars);
+	this.selectAll = sinon.stub(_chart.canvas.svg, 'selectAll').returns(this.bars);
 	this.filtered_bars = {transition: function(){}, data: function(){}, attr: function(){}};
 	this.filter_bars_by_date = sinon.stub(balance_chart, 'filter_bars_by_date').returns(this.filtered_bars);
 	this.data_binder = sinon.stub(this.filtered_bars, 'data').returns(this.filtered_bars);
@@ -397,21 +397,82 @@ QUnit.test('get_dates', function(assert){
     assert.deepEqual(dates, ['2017-03-02', '2017-03-03'])
 });
 
-QUnit.module('filter_bars_by_date', {});
+QUnit.module('filter_bars_by_date', {
+    beforeEach: function(){
+	this.nodes = [{attr: function(date){return '2017-03-01'}},
+		      {attr: function(date){return '2017-03-02'}},
+		      {attr: function(date){return '2017-03-03'}},
+		     ];
+	this.bars = {
+	    nodes: sinon.stub().returns(this.nodes)
+	};
+	this.dates = ['2017-03-02', '2017-03-03'];
+	this.filtered_bars = [this.nodes[1], this.nodes2]
+	this.selectAll = sinon.stub(d3, 'selectAll').returns(this.filtered_bars);
+    },
+
+    afterEach: function(){
+	this.selectAll.restore();
+    }
+
+});
 
 QUnit.test('', function(assert){
-    var bars = [{attr: function(date){return '2017-03-01'}},
-		{attr: function(date){return '2017-03-02'}},
-		{attr: function(date){return '2017-03-03'}},
-	       ];
 
-    var expected = ['2017-03-02',
-		    '2017-03-03'
-		   ];
+    var output = balance_chart.filter_bars_by_date(this.bars, this.dates);
 
-    var dates = ['2017-03-02', '2017-03-03'];
+    assert.deepEqual(output, this.filtered_bars);
+});
 
-    var output = balance_chart.filter_bars_by_date(bars, dates);
+QUnit.module('get_y', {
+    beforeEach: function(){
+	this.scale = sinon.stub();
+	this.get_scale = sinon.stub(_chart.axes.yaxis.call, 'scale').returns(this.scale);
+	this.balance = 10;
+	this.get_balance = sinon.stub(balance_chart, 'get_balance').returns(this.balance);
+	this.data = ['2017-03-01', this.balance]
+    },
+    afterEach: function(){
+	this.get_scale.restore();
+	this.get_balance.restore();
+    }
+});
 
-    assert.deepEqual(output, expected);
+// call the chart scale function on the balance
+QUnit.test('', function(assert){
+    
+    balance_chart.get_y(this.data);
+
+    assert.deepEqual(this.get_balance.firstCall.args, [this.data]);
+    assert.deepEqual(this.get_scale.firstCall.args, []);
+    assert.deepEqual(this.scale.firstCall.args, [this.balance]);
+});
+
+QUnit.module('get_height', {
+    beforeEach: function(){
+	_chart.height = 12;
+	_chart.margin = {bottom: 2};
+	this.balance = 10;
+	this.data = ['2017-03-01', this.balance]
+	this.scaled_balance = 3
+	
+	this.scale = sinon.stub().returns(this.scaled_balance);
+	this.get_scale = sinon.stub(_chart.axes.yaxis.call, 'scale').returns(this.scale);
+	this.get_balance = sinon.stub(balance_chart, 'get_balance').returns(this.balance);
+    },
+    afterEach: function(){
+	this.get_scale.restore();
+	this.get_balance.restore();
+    }
+});
+
+QUnit.test('', function(assert){
+
+    var height = balance_chart.get_height(this.data);
+
+    assert.deepEqual(this.get_balance.firstCall.args, [this.data]);
+    assert.deepEqual(this.get_scale.firstCall.args, []);
+    assert.deepEqual(this.scale.firstCall.args, [this.balance]);
+    assert.equal(height, _chart.height - _chart.margin.bottom - this.scaled_balance);
+    
 });

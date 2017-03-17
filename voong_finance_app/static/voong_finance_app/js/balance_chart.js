@@ -134,8 +134,9 @@ var balance_chart = new function(){
     };
 
     this.update_data = function(data){
-	var bars = _chart.svg.selectAll('.bar');
-	var filtered_bars = balance_chart.filter_bars_by_date(bars, balance_chart.get_dates(data.values));
+	var bars = _chart.canvas.svg.selectAll('.bar');
+	var dates = balance_chart.get_dates(data.values);
+	var filtered_bars = balance_chart.filter_bars_by_date(bars, dates);
 	filtered_bars.data(data.values)
 	    .transition()
 	    .attr('y', balance_chart.get_y)
@@ -153,22 +154,29 @@ var balance_chart = new function(){
 
     this.filter_bars_by_date = function(bars, dates){
 	output = []
+	nodes = bars.nodes();
 	for(var i=0; i<dates.length; i++){
-	    for(var j=0; j<bars.length; j++){
-		if(bars[j].attr('date') == dates[i]){
-		    output.push(dates[i]);
+	    for(var j=0; j<nodes.length; j++){
+		if($(nodes[j]).attr('date') == dates[i]){
+		    output.push(nodes[j]);
 		    break;
 		}
 	    }
 	}
-	return output;
+	return d3.selectAll(output);
     };
 
     this.get_y = function(d){
-	// balance = balance_chart.get_balance(d);
-	// return chart_.axes.yaxis.call.scale()(balance);
+	var balance = balance_chart.get_balance(d);
+	var scale = _chart.axes.yaxis.call.scale();
+	return scale(balance);
     };
 
-    this.get_height = function(){};
+    this.get_height = function(d){
+	var balance = balance_chart.get_balance(d);
+	var scale = _chart.axes.yaxis.call.scale();
+	var scaled_balance = scale(balance);
+	return _chart.height - _chart.margin.bottom - scaled_balance;
+    };
 
 }

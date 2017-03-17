@@ -29,6 +29,7 @@ class Balance(models.Model):
         transactions = Transaction.objects.filter(date=dates[0])
         if len(transactions):
             initial_balance += transactions.aggregate(Sum('size'))['size__sum']
+        # todo: need to save this balance
         output['values'].append([dates[0].isoformat(), initial_balance])
         return cls.calculate_balances(output, initial_balance, dates[1:])
 
