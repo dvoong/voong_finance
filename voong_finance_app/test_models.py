@@ -1,6 +1,7 @@
 import datetime
 from unittest import mock
 from django.test import TestCase
+from voong_finance_app.tests import VoongTestCase
 from voong_finance_app.models import Transaction, Balance
 
 class TestTransaction(TestCase):
@@ -180,14 +181,34 @@ class TestBalanceCalculateBalances(TestCase):
         self.assertEqual(output['values'][1][0], '2017-03-01')
         self.assertEqual(output['values'][1][1], 3)
 
-    # def test_if_there_are_no_transactions_add_0_to_the_initial_balance(self):
-    #     input = {'columns': ['date', 'balance'], 'values': [['2017-02-28', 7]]}
-    #     initial_balance = 7
-    #     dates = [datetime.date(2017, 3, 1)]
-    #     self.Transaction.objects.filter.return_value = []
-    #     patch = mock.patch('voong_finance_app.models.Balance.calculate_balances')
-    #     calculate_balances = patch.start()
+class TestBalanceToDict(VoongTestCase):
 
-    #     output = Balance.calculate_balances(input, initial_balance, dates)
+    def setUp(self):
+        self.patches = []
+        Balance.objects.create(date='2017-03-01', balance=10)
+        Balance.objects.create(date='2017-03-02', balance=11)
+        Balance.objects.create(date='2017-03-03', balance=12)
+        self.balances = Balance.objects.all()
 
-    #     patch.stop()
+    def test(self):
+
+        output = Balance.to_dict(self.balances)
+        expected = {"columns": ["date", "balance"], "values": [["2017-03-01", 10.0], ["2017-03-02", 11.0], ["2017-03-03", 12.0]]}
+
+        self.assertEqual(output, expected)
+        
+class TestBalanceGetBalances(VoongTestCase):
+
+    def setUp(self):
+        self.patches = []
+
+    def test(self):
+
+        # find balance objects between start and end
+        # if there is an entry for every date then return those entries
+        # else find the last entry and calculate balances from the day after to the end argument
+        # ie call calculate_balances from the day after to the end
+        # if there is no last entry throw an error
+        self.assertTrue(False, 'TODO')
+        
+

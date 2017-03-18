@@ -160,7 +160,7 @@ class FunctionalTest(StaticLiveServerTestCase):
 
         # The balance chart should be centred around today
         bars = balance_chart.find_elements_by_css_selector('.bar')
-        self.assertEqual(len(bars(28)))
+        self.assertEqual(len(bars), 28)
         bar = bars[13]
         self.assertEqual(bar.get_attribute('date'), datetime.date.today().isoformat())
 

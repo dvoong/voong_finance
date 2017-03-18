@@ -476,3 +476,33 @@ QUnit.test('', function(assert){
     assert.equal(height, _chart.height - _chart.margin.bottom - this.scaled_balance);
     
 });
+
+function stub(object, func, stubs){
+    var stub = sinon.stub(object, func);
+    stubs.push(stub);
+    return stub;
+}
+
+function restore_stubs(stubs){
+    for(var i=0; i<stubs.length; i++){
+	stubs[i].restore();
+    }
+}
+
+QUnit.module('get_balances', {
+    beforeEach: function(){
+	this.stubs = [];
+	this.get = stub($, 'get', this.stubs);
+    },
+    afterEach: function(){
+	restore_stubs(this.stubs);
+    }
+});
+// makes ajax request to /api/get-balances
+// on success: call the callback with the response data
+QUnit.test('', function(assert){
+
+    balance_chart.get_balances(this.callback);
+
+    assert.deepEqual(this.get.firstCall.args, ['/api/get-balances', this.callback]);
+});

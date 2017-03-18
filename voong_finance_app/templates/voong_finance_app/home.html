@@ -8,15 +8,6 @@
       <div id='logo'></div>
       <button id='create-transaction-btn' type='button'>Create Transaction</button>
     </div>
-    <h1>Welcome</h1>
-    <div id='balance-initialisation'>
-      <form onsubmit='return false;'>
-	{% csrf_token %}
-	<input id='input' type='number' name='initial-balance'>
-	<input id='date'>
-	<input id='submit-button' type='submit' value='Submit'>
-      </form>
-    </div>
     <div id="balance-chart"></div>
     <div id='calendar'></div>
 
@@ -29,7 +20,7 @@
     <script src='{% static "voong_finance_app/js/transactions.js" %}'></script>
     <script src='{% static "voong_finance/js/d3.js" %}'></script>
     <script>
-      balance_initialisation_form = new balance_initialisation.BalanceInitialisation();
+      $.ready(vf.home.initialise());
     </script>
   </body>
 </html>

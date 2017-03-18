@@ -7,6 +7,8 @@ from voong_finance_app.utils import convert_date_string
 
 # Create your views here.
 def home(request):
+    if len(Balance.objects.all()):
+        return render(request, 'voong_finance_app/home.html')
     return render(request, 'voong_finance_app/welcome.html')
 
 def initialise_balance(request):
@@ -66,3 +68,12 @@ def transaction_form(request):
         ##
         
         return JsonResponse(response)
+
+def get_balances(request):
+    today = datetime.date.today()
+    start = today - datetime.timedelta(days=13)
+    end = today + datetime.timedelta(days=15)
+    balances = Balance.get_balances(start=start, end=end)
+    dict_ = Balance.to_dict(balances)
+    response = JsonResponse(dict_)
+    return response

@@ -1,3 +1,4 @@
+import json
 import datetime
 from django.db import models
 from django.db.models import Sum
@@ -32,6 +33,12 @@ class Balance(models.Model):
         # todo: need to save this balance
         output['values'].append([dates[0].isoformat(), initial_balance])
         return cls.calculate_balances(output, initial_balance, dates[1:])
+
+    @staticmethod
+    def to_dict(balances):
+        output = {'columns': ['date', 'balance']}
+        output['values'] = list(map(lambda e: [e.date.isoformat(), e.balance], balances))
+        return output
 
 class Transaction(models.Model):
 

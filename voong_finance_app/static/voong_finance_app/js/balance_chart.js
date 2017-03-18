@@ -179,4 +179,8 @@ var balance_chart = new function(){
 	return _chart.height - _chart.margin.bottom - scaled_balance;
     };
 
+    this.get_balances = function(callback){
+	$.get('/api/get-balances', callback);
+    };
+
 }

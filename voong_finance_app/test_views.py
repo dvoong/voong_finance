@@ -4,10 +4,40 @@ from datetime import date
 from unittest import mock
 from django.test import TestCase, Client
 from django.urls import resolve
-from .views import initialise_balance, transaction_form
+from .views import initialise_balance, transaction_form, home, get_balances
+from voong_finance_app.tests import VoongTestCase
 from voong_finance_app import  views
 
 # Create your tests here.
+class TestHome(VoongTestCase):
+
+    def setUp(self):
+        super(TestHome, self).setUp()
+        self.request = mock.Mock()
+        self.render = self.mock('voong_finance_app.views.render')
+        self.Balance = self.mock('voong_finance_app.views.Balance')
+        
+    def test_url_resolution(self):
+
+        resolver = resolve('/api/')
+
+        self.assertEqual(resolver.func, home)
+
+    def test_if_no_balance_entries_exist_return_welcome_page(self):
+        self.Balance.objects.all.return_value = []
+
+        home(self.request)
+
+        self.render.assert_called_once_with(self.request, 'voong_finance_app/welcome.html')
+
+
+    def test_if_balance_entries_do_exist_return_home_page(self):
+        self.Balance.objects.all.return_value = [mock.Mock()]
+
+        home(self.request)
+
+        self.render.assert_called_once_with(self.request, 'voong_finance_app/home.html')
+        
 @mock.patch('voong_finance_app.views.datetime.date')
 class TestInitialiseBalance(TestCase):
 
@@ -29,6 +59,8 @@ class TestInitialiseBalance(TestCase):
 
         resolver = resolve('/api/initialise-balance')
         self.assertEqual(resolver.func, initialise_balance)
+
+    #def test_if_balance_entries_already_exist
 
     def test_if_date_argument_not_passed_use_today(self, mock_date):
         expected_date = datetime.datetime(2017, 1, 24).date()
@@ -209,4 +241,38 @@ class TestTransactionFormIntegration(TestCase):
         self.assertEqual(response['values'][-1][0], '2017-02-17')
         self.assertEqual(response['values'][-1][1], -10)
 
-print('test_views')        
+class TestGetBalances(VoongTestCase):
+
+    def setUp(self):
+        super(TestGetBalances, self).setUp()
+        self.Balance = self.mock('voong_finance_app.views.Balance')
+        self.balances = [{'date': '2017-03-01', 'balance': 1},
+                         {'date': '2017-03-03', 'balance': 2},
+                         {'date': '2017-03-03', 'balance': 3}]
+        self.Balance.get_balances.return_value = self.balances
+        self.dict_ = mock.Mock()
+        self.Balance.to_dict.return_value = self.dict_
+        self.json_response = mock.Mock()
+        self.JsonResponse = self.mock('voong_finance_app.views.JsonResponse')
+        self.JsonResponse.return_value = self.json_response
+        self.request = mock.Mock()
+
+    def test_url_resolution(self):
+
+        resolver = resolve('/api/get-balances')
+
+        self.assertEqual(resolver.func, get_balances)
+
+    def test(self):
+        balances = get_balances(self.request)
+
+        today = datetime.date.today()
+        start = today - datetime.timedelta(days=13)
+        end = today + datetime.timedelta(days=15)
+        self.Balance.get_balances.assert_called_once_with(start=start, end=end)
+        self.Balance.to_dict.assert_called_once_with(self.balances)
+        self.JsonResponse.assert_called_once_with(self.dict_)
+        self.assertEqual(balances, self.json_response)
+
+    
+
