@@ -28,7 +28,7 @@ def initialise_balance(request):
 
 def transaction_form(request):
     if request.method == 'GET':
-        return render(request, 'voong_finance_app/transaction-form.html', {'form': str(TransactionForm())})
+        return render(request, 'voong_finance_app/transaction-form.html', {'form': str(TransactionForm(initial={'date': datetime.date.today()}))})
     elif request.method == 'POST':
         year = int(request.POST['date_year'])
         month = int(request.POST['date_month'])

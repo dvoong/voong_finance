@@ -113,11 +113,11 @@ class FunctionalTest(StaticLiveServerTestCase):
 
         # david sets the date to next week
         transaction_date = self.today + datetime.timedelta(days=7)
-        year_selector.send_keys(transaction_date.year)
-        month_selector.send_keys(transaction_date.month)
-        day_selector.send_keys(transaction_date.day)
-        
-        # david enters the amount as 15 GBP
+        year_selector.send_keys(str(transaction_date.year))
+        month_selector.send_keys(transaction_date.strftime("%B"))
+        day_selector.send_keys(str(transaction_date.day))
+
+        # david enters the amount as 719.99
         transaction_size_input = transaction_form.find_element_by_id('transaction-size-input')
         transaction_size_input.send_keys('719.99')
         

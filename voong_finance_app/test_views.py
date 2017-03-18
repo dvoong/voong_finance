@@ -126,7 +126,8 @@ class TestTransactionForm(TestCase):
         context = {'form': str(TransactionForm.return_value)}
         
         response = views.transaction_form(request)
-        
+
+        TransactionForm.assert_called_once_with(initial={'date': datetime.date.today()})
         render.assert_called_with(request, template_name, context)
 
     def test_called_with_post_then_creates_a_new_transaction_object(self, render, TransactionForm):
