@@ -54,7 +54,6 @@ class FunctionalTest(StaticLiveServerTestCase):
 
         # he inputs his balance as 4344.40 GBP and hits ok/next/done button
         input_field.send_keys(str(INITIAL_BALANCE))
-        # TODO: test invalid inputs
 
         # He clicks the submit button
         submit_button.click()
@@ -94,7 +93,16 @@ class FunctionalTest(StaticLiveServerTestCase):
 
         # a transaction form appears
         transaction_form = first_entry_prompt.find_element_by_id('transaction-form')
-    
+
+        # the date for the transaction is set to today
+        today = datetime.date.today()
+        year_selector = transaction_form.find_element_by_id('date-selector_year');
+        self.assertEqual(year_selector.get_attribute('value'), str(today.year))
+        month_selector = transaction_form.find_element_by_id('date-selector_month');
+        self.assertEqual(month_selector.get_attribute('value'), str(today.month))
+        day_selector = transaction_form.find_element_by_id('date-selector_day');
+        self.assertEqual(day_selector.get_attribute('value'), str(today.day))
+        
         # david sets transaction type to expense
         transaction_type_dropdown = transaction_form.find_element_by_id('transaction-type-dropdown')
         Select(transaction_type_dropdown).select_by_visible_text('Expense')
@@ -102,25 +110,12 @@ class FunctionalTest(StaticLiveServerTestCase):
         # david types name as phone bill
         transaction_description = transaction_form.find_element_by_id('transaction-description')
         transaction_description.send_keys('New Phone')
-        
+
         # david sets the date to next week
-        date = self.today + datetime.timedelta(days=7)
-        # date_selector = transaction_form.find_element_by_id('date-selector')
-        # date_selector.send_keys((self.today + datetime.timedelta(days=7)).isoformat())
-        year_selector = transaction_form.find_element_by_id('date-selector_year');
-        year_selector.send_keys(date.year)
-        month_selector = transaction_form.find_element_by_id('date-selector_month');
-        month_selector.send_keys(date.month)
-        day_selector = transaction_form.find_element_by_id('date-selector_day');
-        day_selector.send_keys(date.day)
-        
-        # david ticks the "transaction repeats" checkbox
-        # repeating_transaction_checkbox = transaction_form.find_element_by_id('repeating-transaction-checkbox')
-        # repeating_transaction_checkbox.click()
-        
-        # david selects "repeats monthly"
-        repeat_frequency_dropdown = transaction_form.find_element_by_id('repeat-frequency-dropdown')
-        Select(repeat_frequency_dropdown).select_by_visible_text('Monthly')
+        transaction_date = self.today + datetime.timedelta(days=7)
+        year_selector.send_keys(transaction_date.year)
+        month_selector.send_keys(transaction_date.month)
+        day_selector.send_keys(transaction_date.day)
         
         # david enters the amount as 15 GBP
         transaction_size_input = transaction_form.find_element_by_id('transaction-size-input')
@@ -136,25 +131,60 @@ class FunctionalTest(StaticLiveServerTestCase):
         # The balance chart updates
         # bars = balance_chart.find_elements_by_css_selector('.bar[date="{}"]'.format(date))
         bars = balance_chart.find_elements_by_css_selector('.bar')
-        bar = [bar for bar in bars if bar.get_attribute('date') == date.isoformat()]
+        bar = [bar for bar in bars if bar.get_attribute('date') == transaction_date.isoformat()]
         self.assertEqual(len(bar), 1)
         bar = bar[0]
         self.assertEqual(bar.get_attribute('balance'), str(INITIAL_BALANCE - 719.99))
-
-        # ui needs to update the chart with new date send back by the transaction form
-        # see page 143 in d3 book
-        # transaction form view needs to return data. From today to 4 weeks ahead
 
         # the range of dates should be unchanged
         bars[0].get_attribute('date') == self.today.isoformat()
         bars[0].get_attribute('balance') == INITIAL_BALANCE
         self.assertEqual(len(bars), 28)
+
+        # next week shows the balance as 4329.40, this is true for dates following it also
         bars[-1].get_attribute('date') == (self.today + datetime.timedelta(days=27)).isoformat()
         bars[-1].get_attribute('balance') == str(INITIAL_BALANCE - 719.99)
 
-        # next week shows the balance as 4329.40, this is true for dates following it also
         # the dates between today and next week show the original balance (inclusive of today, exclusive of next week)
+        bars[6].get_attribute('date') == (self.today + datetime.timedelta(days=6)).isoformat()
+        bars[6].get_attribute('balance') == str(INITIAL_BALANCE)
+        bars[7].get_attribute('date') == transaction_date.isoformat()
+        bars[7].get_attribute('balance') == str(INITIAL_BALANCE - 719.99)
+
+        # David reloads the page
+        self.browser.get(self.live_server_url)
+
+        # instead of seeing the welcome screen he sees the existing balance chart
+        WebDriverWait(self.browser, 5).until_not(EC.presence_of_element_located(('id', 'balance-initialisation')))
+        balance_chart = self.browser.find_element_by_id('balance-chart')
+
+        # The balance chart should be centred around today
+        bars = balance_chart.find_elements_by_css_selector('.bar')
+        self.assertEqual(len(bars(28)))
+        bar = bars[13]
+        self.assertEqual(bar.get_attribute('date'), datetime.date.today().isoformat())
+
+        # bars should have the same values
+        map(lambda bar: self.assertEqual(bar.get_attribute('balance'), str(INITIAL_BALANCE - 719.99)), bars)
+        
         # the calendar view also shows a new entry on the date for next week
+        dates = calendar.find_element_by_css_selector('.date');
+        date = None
+        for date in dates:
+            if date.get_attribute('date') == transaction_date.isoformat():
+                break
+        transaction = date.find_element_by_css_selector('.transaction')
+        self.assertEqual(transaction.get_attribute('size'), str(719.99))
+        self.assertEqual(transaction.text(), str(719.99))
+        
+        # david ticks the "transaction repeats" checkbox
+        # repeating_transaction_checkbox = transaction_form.find_element_by_id('repeating-transaction-checkbox')
+        # repeating_transaction_checkbox.click()
+        
+        # # david selects "repeats monthly"
+        # repeat_frequency_dropdown = transaction_form.find_element_by_id('repeat-frequency-dropdown')
+        # Select(repeat_frequency_dropdown).select_by_visible_text('Monthly')
+        
         # david wants to check that this worked for future dates
         # he clicks a button to skip ahead to the next month
         # the charts slides along and centres on the same date (TODO: What about when the next month doesn't have the smae number of dates?
