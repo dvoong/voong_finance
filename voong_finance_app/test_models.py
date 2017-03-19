@@ -124,7 +124,7 @@ class TestBalanceLastEntry(TestCase):
         self.assertEqual(None, last_entry)
         
 
-class TestBalanceCalculateBalances(TestCase):
+class TestBalanceCalculateBalances(VoongTestCase):
 
     # if the number of dates is 0 then return the output
     # calculate_the_balance_for_the_first_date
@@ -132,12 +132,18 @@ class TestBalanceCalculateBalances(TestCase):
     # calls calculate_balance for the remaning dates
 
     def setUp(self):
+        self.patches = []
         self.Transaction_patch = mock.patch('voong_finance_app.models.Transaction')
         self.Transaction = self.Transaction_patch.start()
         self.Sum_patch = mock.patch('voong_finance_app.models.Sum')
         self.Sum = self.Sum_patch.start()
+        self.input = {'columns': ['date', 'balance'], 'values': [['2017-02-28', 7]]}
+        self.initial_balance = 7
+        self.dates = [datetime.date(2017, 3, 1)]
+        self.objects = self.mock('voong_finance_app.models.Balance.objects')
 
     def tearDown(self):
+        super(TestBalanceCalculateBalances, self).tearDown()
         self.Transaction_patch.stop()
         self.Sum_patch.stop()
 
@@ -169,17 +175,20 @@ class TestBalanceCalculateBalances(TestCase):
 
     def test_add_the_balance_to_the_output(self):
 
-        input = {'columns': ['date', 'balance'], 'values': [['2017-02-28', 7]]}
-        initial_balance = 7
-        dates = [datetime.date(2017, 3, 1)]
         transactions = mock.Mock(__len__=mock.Mock(return_value=1))
         self.Transaction.objects.filter.return_value = transactions
         transactions.aggregate.return_value = {'size__sum': -4}
         
-        output = Balance.calculate_balances(input, initial_balance, dates)
+        output = Balance.calculate_balances(self.input, self.initial_balance, self.dates)
 
         self.assertEqual(output['values'][1][0], '2017-03-01')
         self.assertEqual(output['values'][1][1], 3)
+
+    def test_creates_balance_objects(self):
+
+        output = Balance.calculate_balances(self.input, self.initial_balance, self.dates)
+
+        self.objects.create.assert_called_once_with(date=self.dates[0], balance=self.initial_balance)
 
 class TestBalanceToDict(VoongTestCase):
 
@@ -201,14 +210,34 @@ class TestBalanceGetBalances(VoongTestCase):
 
     def setUp(self):
         self.patches = []
+        self.objects = self.mock('voong_finance_app.models.Balance.objects')
+        self.objects.filter.return_value = mock.Mock()
+        self.start = datetime.date(2017, 3, 1)
+        self.end = datetime.date(2017, 3, 4)
+        self.len = self.mock('voong_finance_app.models.len')
+        self.set = self.mock('voong_finance_app.models.set')
+        self.map = self.mock('voong_finance_app.models.map')
+        self.last_entry_ = Balance(date=datetime.date(2017, 2, 26), balance=10)
+        self.last_entry = self.mock('voong_finance_app.models.Balance.last_entry')
+        self.last_entry.return_value = self.last_entry_
+        self.calculate_balances = self.mock('voong_finance_app.models.Balance.calculate_balances')
 
-    def test(self):
+    def test_all_entries_exist(self):
+        self.len.return_value = 3
 
-        # find balance objects between start and end
-        # if there is an entry for every date then return those entries
+        balances = Balance.get_balances(start=self.start, end=self.end)
+
+        self.objects.filter.assert_called_once_with(date__gte=self.start, date__lt=self.end)
+        self.assertEqual(balances, self.objects.filter.return_value)
+
+    def test_not_all_entries_exist(self):
+        self.len.return_value = 2
+
+        balances = Balance.get_balances(start=self.start, end=self.end)
+
+        self.last_entry.assert_called_once_with()
         # else find the last entry and calculate balances from the day after to the end argument
         # ie call calculate_balances from the day after to the end
-        # if there is no last entry throw an error
-        self.assertTrue(False, 'TODO')
-        
-
+        self.calculate_balances.assert_called_once_with(self.last_entry_.date + datetime.timedelta(days=1), self.end)
+        self.objects.filter.assert_called_with(date__gte=self.start, date__lt=self.end)
+        self.assertEqual(balances, self.objects.filter.return_value)

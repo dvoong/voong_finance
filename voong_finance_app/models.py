@@ -30,7 +30,7 @@ class Balance(models.Model):
         transactions = Transaction.objects.filter(date=dates[0])
         if len(transactions):
             initial_balance += transactions.aggregate(Sum('size'))['size__sum']
-        # todo: need to save this balance
+        cls.objects.create(date=dates[0], balance=initial_balance)
         output['values'].append([dates[0].isoformat(), initial_balance])
         return cls.calculate_balances(output, initial_balance, dates[1:])
 
@@ -39,6 +39,24 @@ class Balance(models.Model):
         output = {'columns': ['date', 'balance']}
         output['values'] = list(map(lambda e: [e.date.isoformat(), e.balance], balances))
         return output
+
+    @classmethod
+    def get_balances(cls, start, end):
+        balances = cls.objects.filter(date__gte=start, date__lt=end).order_by('date')
+        dates = set(map(lambda x: x.date, balances))
+        if len(dates) == (end - start).days:
+            return balances
+        else:
+            # last_entry = cls.last_entry() # get last entry before start
+            previous_entries = cls.objects.filter(date__lt=start).order_by('date')
+            last_entry = previous_entries[len(previous_entries) - 1] if len(previous_entries) else None
+            balance = last_entry.balance if last_entry else 0
+            missing_dates = list(set(date_range(start, end)) - dates) # only dates that don't have a balance already
+            output = {'columns': ['date', 'balance'], 'values': []}
+            cls.calculate_balances(output, balance, missing_dates)
+        output = cls.objects.filter(date__gte=start, date__lt=end).order_by('date')
+        return output
+        
 
 class Transaction(models.Model):
 

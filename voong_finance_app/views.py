@@ -42,10 +42,10 @@ def transaction_form(request):
             if transaction_type == 0:
                 size *= -1
                 
-            Transaction.objects.create(date=date,
-                                       description=request.POST['description'],
-                                       type=transaction_type,
-                                       size=size)
+            transaction = Transaction.objects.create(date=date,
+                                                     description=request.POST['description'],
+                                                     type=transaction_type,
+                                                     size=size)
         else:
             year = request.POST['end_date_year']
             month = request.POST['end_date_month']
@@ -62,8 +62,8 @@ def transaction_form(request):
 
         # untested
         start = convert_date_string(request.POST['chart_date_start'])
-        end = convert_date_string(request.POST['chart_date_end'])
-        response = Balance.recalculate(date, end + datetime.timedelta(days=1))
+        end = convert_date_string(request.POST['chart_date_end']) + datetime.timedelta(days=1)
+        response = Balance.recalculate(date, end)
         response['values'] = list(filter(lambda x: convert_date_string(x[0]) >= start, response['values']))
         ##
         
