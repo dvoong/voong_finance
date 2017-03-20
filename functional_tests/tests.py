@@ -183,6 +183,8 @@ class FunctionalTest(StaticLiveServerTestCase):
         # # david selects "repeats monthly"
         # repeat_frequency_dropdown = transaction_form.find_element_by_id('repeat-frequency-dropdown')
         # Select(repeat_frequency_dropdown).select_by_visible_text('Monthly')
+
+        # bug initialise balance on a day and make a transaction on the same day will give incorrect balances
         
         # david wants to check that this worked for future dates
         # he clicks a button to skip ahead to the next month

@@ -17,6 +17,10 @@ def initialise_balance(request):
         date = datetime.datetime.strptime(data['date'], '%Y-%m-%d').date()
     else:
         date = datetime.date.today()
+
+    # create a initialise_balance transaction
+    # call get_balances from date to 28 days in the future
+        
     date_str = date.isoformat()
     balance = float(request.POST['balance'])
     for i in range(28):
@@ -46,6 +50,9 @@ def transaction_form(request):
                                                      description=request.POST['description'],
                                                      type=transaction_type,
                                                      size=size)
+            # create transaction
+            # add transaction to future balance entries and the entry for the transaction date
+            # 
         else:
             year = request.POST['end_date_year']
             month = request.POST['end_date_month']

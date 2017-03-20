@@ -221,6 +221,7 @@ class TestBalanceGetBalances(VoongTestCase):
         self.last_entry = self.mock('voong_finance_app.models.Balance.last_entry')
         self.last_entry.return_value = self.last_entry_
         self.calculate_balances = self.mock('voong_finance_app.models.Balance.calculate_balances')
+        self.date_range = self.mock('voong_finance_app.models.date_range')
 
     def test_all_entries_exist(self):
         self.len.return_value = 3
@@ -228,16 +229,32 @@ class TestBalanceGetBalances(VoongTestCase):
         balances = Balance.get_balances(start=self.start, end=self.end)
 
         self.objects.filter.assert_called_once_with(date__gte=self.start, date__lt=self.end)
-        self.assertEqual(balances, self.objects.filter.return_value)
+        self.objects.filter().order_by.assert_called_once_with('date')
+        self.assertEqual(balances, self.objects.filter().order_by.return_value)
 
     def test_not_all_entries_exist(self):
         self.len.return_value = 2
+        output = {'columns': ['date', 'balance'], 'values': []}
 
-        balances = Balance.get_balances(start=self.start, end=self.end)
+        balances = Balance.get_balances(self.start, self.end)
 
         self.last_entry.assert_called_once_with()
-        # else find the last entry and calculate balances from the day after to the end argument
-        # ie call calculate_balances from the day after to the end
-        self.calculate_balances.assert_called_once_with(self.last_entry_.date + datetime.timedelta(days=1), self.end)
+        self.date_range.assert_called_once_with(self.last_entry_.date + datetime.timedelta(days=1), self.end)
+        self.calculate_balances.assert_called_once_with(output, self.last_entry_.balance, self.date_range.return_value)
         self.objects.filter.assert_called_with(date__gte=self.start, date__lt=self.end)
-        self.assertEqual(balances, self.objects.filter.return_value)
+        self.assertEqual(balances, self.objects.filter().order_by.return_value)
+
+    def test_not_all_entries_exist_an_no_last_entry(self):
+        self.len.return_value = 0
+        last_entry = None
+        self.last_entry.return_value = last_entry
+        output = {'columns': ['date', 'balance'], 'values': []}
+
+        balances = Balance.get_balances(self.start, self.end)
+
+        self.last_entry.assert_called_once_with()
+        self.date_range.assert_called_once_with(self.start, self.end)
+        self.calculate_balances.assert_called_once_with(output, 0, self.date_range.return_value)
+        self.objects.filter.assert_called_with(date__gte=self.start, date__lt=self.end)
+        self.assertEqual(balances, self.objects.filter().order_by.return_value)
+        

@@ -47,13 +47,12 @@ class Balance(models.Model):
         if len(dates) == (end - start).days:
             return balances
         else:
-            # last_entry = cls.last_entry() # get last entry before start
-            previous_entries = cls.objects.filter(date__lt=start).order_by('date')
-            last_entry = previous_entries[len(previous_entries) - 1] if len(previous_entries) else None
+            last_entry = cls.last_entry() # get last entry before start
             balance = last_entry.balance if last_entry else 0
-            missing_dates = list(set(date_range(start, end)) - dates) # only dates that don't have a balance already
+            start_calculate = last_entry.date + datetime.timedelta(days=1) if last_entry else start
+            dates = date_range(start_calculate, end)
             output = {'columns': ['date', 'balance'], 'values': []}
-            cls.calculate_balances(output, balance, missing_dates)
+            cls.calculate_balances(output, balance, dates)
         output = cls.objects.filter(date__gte=start, date__lt=end).order_by('date')
         return output
         
