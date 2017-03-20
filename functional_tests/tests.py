@@ -159,8 +159,9 @@ class FunctionalTest(StaticLiveServerTestCase):
         balance_chart = self.browser.find_element_by_id('balance-chart')
 
         # The balance chart should be centred around today
-        import time
-        time.sleep(10)
+        from selenium.webdriver.common.by import By
+
+        WebDriverWait(self.browser, 5).until(EC.visibility_of_element_located((By.CSS_SELECTOR, ".bar")))
         bars = balance_chart.find_elements_by_css_selector('.bar')
         self.assertEqual(len(bars), 28)
         bar = bars[13]
@@ -172,6 +173,45 @@ class FunctionalTest(StaticLiveServerTestCase):
         # the calendar view also shows a new entry on the date for next week
         calendar = self.browser.find_element_by_id('calendar')
         dates = calendar.find_element_by_css_selector('.date');
+
+        # david goes to add another transaction
+        create_transaction_btn = self.browser.find_element_by_id('create-transaction-btn')
+        create_transaction_btn.click()
+
+        # another transaction form appears
+        transaction_form = self.browser.find_element_by_id('transaction-form')
+
+        # # the date for the transaction is set to today
+        # year_selector = transaction_form.find_element_by_id('date-selector_year');
+        # self.assertEqual(year_selector.get_attribute('value'), '2017')
+        # month_selector = transaction_form.find_element_by_id('date-selector_month');
+        # self.assertEqual(month_selector.get_attribute('value'), str('January'))
+        # day_selector = transaction_form.find_element_by_id('date-selector_day');
+        # self.assertEqual(day_selector.get_attribute('value'), str('24'))
+        
+        # # david sets transaction type to expense
+        # transaction_type_dropdown = transaction_form.find_element_by_id('transaction-type-dropdown')
+        # Select(transaction_type_dropdown).select_by_visible_text('Income')
+        
+        # # david types name as phone bill
+        # transaction_description = transaction_form.find_element_by_id('transaction-description')
+        # transaction_description.send_keys('Pay Day')
+
+        # # david sets the date to next week
+        # transaction_date = self.today + datetime.timedelta(days=7)
+        # year_selector.send_keys(str(transaction_date.year))
+        # month_selector.send_keys(transaction_date.strftime("%B"))
+        # day_selector.send_keys(str(transaction_date.day))
+
+        # # david enters the amount as 719.99
+        # transaction_size_input = transaction_form.find_element_by_id('transaction-size-input')
+        # transaction_size_input.send_keys('719.99')
+        
+        # # david clicks the create transaction button
+        # create_transaction_btn = transaction_form.find_element_by_id('create-transaction-btn')
+        # create_transaction_btn.click()
+
+        
         # for date in dates:
         #     if date.get_attribute('date') == transaction_date.isoformat():
         #         break

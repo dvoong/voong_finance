@@ -76,3 +76,12 @@ QUnit.test('', function(assert){
 //     vf.home.initialise();
 //     assert.ok(vf.home.balance_initialisation !== undefined);
 // });
+
+QUnit.module('create_transaction_form', {});
+
+QUnit.test('test', function(assert){
+
+    vf.home.create_transaction_form()
+
+    assert.ok(true);
+});
