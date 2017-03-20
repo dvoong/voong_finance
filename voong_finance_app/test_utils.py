@@ -1,6 +1,7 @@
 import datetime
 from unittest import TestCase
-from voong_finance_app.utils import date_range, convert_date_string
+from voong_finance_app.utils import date_range, convert_date_string, get_month_dates
+from voong_finance_app.tests import VoongTestCase
 
 class TestDateRange(TestCase):
 
@@ -27,3 +28,14 @@ class TestConvertDateString(TestCase):
         date = convert_date_string('2017-03-01')
 
         self.assertEqual(date, expected)
+
+class TestGetMonthDates(VoongTestCase):
+
+    def test(self):
+        date = datetime.date(2017, 1, 10)
+    
+        dates = get_month_dates(date)
+
+        self.assertEqual(dates[0], datetime.date(2017, 1, 1))
+        self.assertEqual(dates[-1], datetime.date(2017, 1, 31))
+        

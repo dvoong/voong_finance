@@ -9,7 +9,12 @@
       <button id='create-transaction-btn' type='button'>Create Transaction</button>
     </div>
     <div id="balance-chart"></div>
-    <div id='calendar'></div>
+    <div id='calendar'>
+      {% for date in dates %}
+      <div class='date' date="{{date.isoformat}}">
+      </div>
+      {% endfor %}
+    </div>
 
     <script src="http://code.jquery.com/jquery.min.js"></script>    
     {% load static %}

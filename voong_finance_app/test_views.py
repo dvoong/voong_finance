@@ -16,6 +16,9 @@ class TestHome(VoongTestCase):
         self.request = mock.Mock()
         self.render = self.mock('voong_finance_app.views.render')
         self.Balance = self.mock('voong_finance_app.views.Balance')
+        self.dates = mock.Mock()
+        self.get_month_dates = self.mock('voong_finance_app.views.get_month_dates')
+        self.get_month_dates.return_value = self.dates
         
     def test_url_resolution(self):
 
@@ -28,7 +31,7 @@ class TestHome(VoongTestCase):
 
         home(self.request)
 
-        self.render.assert_called_once_with(self.request, 'voong_finance_app/welcome.html')
+        self.render.assert_called_once_with(self.request, 'voong_finance_app/welcome.html', {'dates': self.dates})
 
 
     def test_if_balance_entries_do_exist_return_home_page(self):
@@ -36,7 +39,13 @@ class TestHome(VoongTestCase):
 
         home(self.request)
 
-        self.render.assert_called_once_with(self.request, 'voong_finance_app/home.html')
+        self.render.assert_called_once_with(self.request, 'voong_finance_app/home.html', {'dates': self.dates})
+
+    def test_get_dates_for_this_month(self):
+
+        home(self.request)
+
+        self.get_month_dates.assert_called_once_with(datetime.date.today())
         
 @mock.patch('voong_finance_app.views.datetime.date')
 class TestInitialiseBalance(TestCase):

@@ -3,13 +3,14 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from voong_finance_app.forms import TransactionForm
 from voong_finance_app.models import Balance, Transaction, RepeatTransaction
-from voong_finance_app.utils import convert_date_string
+from voong_finance_app.utils import convert_date_string, get_month_dates
 
 # Create your views here.
 def home(request):
+    dates = get_month_dates(datetime.date.today())
     if len(Balance.objects.all()):
-        return render(request, 'voong_finance_app/home.html')
-    return render(request, 'voong_finance_app/welcome.html')
+        return render(request, 'voong_finance_app/home.html', {'dates': dates})
+    return render(request, 'voong_finance_app/welcome.html', {'dates': dates})
 
 def initialise_balance(request):
     data = request.POST
