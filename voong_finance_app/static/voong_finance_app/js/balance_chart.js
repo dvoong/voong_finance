@@ -41,7 +41,8 @@ var balance_chart = new function(){
 	var dates = balance_chart.shorten_date_strings(dates);
 	axes.xaxis.call.scale().domain(dates);
 	var ymax = d3.max(data.values, function(d){return d[1]});
-	axes.yaxis.call.scale().domain([0, ymax]);
+	var ymin = d3.min(data.values, function(d){return d[1]});
+	axes.yaxis.call.scale().domain([Math.min(0, ymin), ymax]);
     };
 
     this.BalanceChart.prototype.draw_axes = function(axes, canvas){

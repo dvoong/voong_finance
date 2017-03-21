@@ -228,6 +228,18 @@ QUnit.test('set domain of the yaxis', function(assert){
     assert.ok(domain_spy.calledWith([0, 11]), domain_spy.firstCall);
 });
 
+QUnit.test('negative balances', function(assert){
+
+    var domain_spy = sinon.spy(this.yaxis.scale(), 'domain');
+
+    this.data.values[0][1] = -10;
+
+    balance_chart.BalanceChart.prototype.configure_axes(this.axes, this.width, this.height, this.margin, this.data);
+    
+    assert.ok(domain_spy.calledOnce);
+    assert.ok(domain_spy.calledWith([-10, 11]), domain_spy.firstCall);
+});
+
 QUnit.module('draw_axes tests', {
     beforeEach: function(){
 	this.axes = {xaxis: {}, yaxis: {}};
