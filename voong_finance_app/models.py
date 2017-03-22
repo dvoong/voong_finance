@@ -43,16 +43,36 @@ class Balance(models.Model):
     @classmethod
     def get_balances(cls, start, end):
         balances = cls.objects.filter(date__gte=start, date__lt=end).order_by('date')
-        dates = set(map(lambda x: x.date, balances))
-        if len(dates) == (end - start).days:
+        missing_dates = filter(lambda date: len(balances.filter(date=date)) == 0, date_range(start, end))
+        if len(missing_dates) == 0:
             return balances
         else:
-            last_entry = cls.last_entry() # get last entry before start
-            balance = last_entry.balance if last_entry else 0
-            start_calculate = last_entry.date + datetime.timedelta(days=1) if last_entry else start
-            dates = date_range(start_calculate, end)
-            output = {'columns': ['date', 'balance'], 'values': []}
-            cls.calculate_balances(output, balance, dates)
+            entry = balances.first()
+            if entry:
+                # if a blance objects exists in this range, calculate balances before and after them
+                dates = date_range(start, entry.date)
+                output = {'columns': ['date', 'balance'], 'values': []}
+                cls.calculate_balances(output, 0, dates)
+
+                entry = balances.last()
+                dates = date_range(entry.date + datetime.timedelta(days=1), end)
+                output = {'columns': ['date', 'balance'], 'values': []}
+                cls.calculate_balances(output, entry.balance, dates)
+            else: # look back for the last entry
+                last_entry = cls.last_entry()
+                if last_entry == None:
+                    output = {'columns': ['date', 'balance'], 'values': []}
+                    cls.calculate_balances(output, 0, date_range(start, end))
+                elif last_entry < start:
+                    output = {'columns': ['date', 'balance'], 'values': []}
+                    dates = date_range(last_entry.date + datetime.timedelta(days=1), end)
+                    cls.calculate_balances(output, last_entry.balance, dates)
+                else:
+                    first_entry = cls.first_entry()
+                    output = {'columns': ['date', 'balance'], 'values': []}
+                    dates = date_range(start, first_entry.date)
+                    cls.calculate_balances(output, 0, dates)
+            
         output = cls.objects.filter(date__gte=start, date__lt=end).order_by('date')
         return output
         

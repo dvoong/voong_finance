@@ -29,7 +29,8 @@ class FunctionalTest(StaticLiveServerTestCase):
     def setUp(self):
         self.browser = webdriver.Chrome()
         # self.browser = webdriver.Firefox()
-        self.today = datetime.date(2017, 1, 24)
+        # self.today = datetime.date(2017, 1, 24)
+        self.today = datetime.date.today()
         
     def tearDown(self):
         self.browser.quit()
@@ -180,37 +181,38 @@ class FunctionalTest(StaticLiveServerTestCase):
 
         # another transaction form appears
         transaction_form = self.browser.find_element_by_id('transaction-form')
-
-        # # the date for the transaction is set to today
-        # year_selector = transaction_form.find_element_by_id('date-selector_year');
-        # self.assertEqual(year_selector.get_attribute('value'), '2017')
-        # month_selector = transaction_form.find_element_by_id('date-selector_month');
-        # self.assertEqual(month_selector.get_attribute('value'), str('January'))
-        # day_selector = transaction_form.find_element_by_id('date-selector_day');
-        # self.assertEqual(day_selector.get_attribute('value'), str('24'))
         
-        # # david sets transaction type to expense
-        # transaction_type_dropdown = transaction_form.find_element_by_id('transaction-type-dropdown')
-        # Select(transaction_type_dropdown).select_by_visible_text('Income')
+        # david sets transaction type to income
+        transaction_type_dropdown = transaction_form.find_element_by_id('transaction-type-dropdown')
+        Select(transaction_type_dropdown).select_by_visible_text('Income')
         
-        # # david types name as phone bill
-        # transaction_description = transaction_form.find_element_by_id('transaction-description')
-        # transaction_description.send_keys('Pay Day')
+        # david types name as Pay Day
+        transaction_description = transaction_form.find_element_by_id('transaction-description')
+        transaction_description.send_keys('Pay Day')
 
-        # # david sets the date to next week
-        # transaction_date = self.today + datetime.timedelta(days=7)
-        # year_selector.send_keys(str(transaction_date.year))
-        # month_selector.send_keys(transaction_date.strftime("%B"))
-        # day_selector.send_keys(str(transaction_date.day))
+        # david sets the date to tomorrow
+        transaction_date = datetime.date.today() + datetime.timedelta(days=1)
+        year_selector.send_keys(str(transaction_date.year))
+        month_selector.send_keys(transaction_date.strftime("%B"))
+        day_selector.send_keys(str(transaction_date.day))
 
-        # # david enters the amount as 719.99
-        # transaction_size_input = transaction_form.find_element_by_id('transaction-size-input')
-        # transaction_size_input.send_keys('719.99')
+        # david enters the amount as 3000
+        transaction_size_input = transaction_form.find_element_by_id('transaction-size-input')
+        transaction_size_input.send_keys('3000')
         
-        # # david clicks the create transaction button
-        # create_transaction_btn = transaction_form.find_element_by_id('create-transaction-btn')
-        # create_transaction_btn.click()
+        # david clicks the create transaction button
+        create_transaction_btn = transaction_form.find_element_by_id('create-transaction-btn')
+        create_transaction_btn.click()
 
+        # he sees the balance chart has been updated
+        balance_chart = self.browser.find_element_by_id(BALANCE_CHART_ID)
+        bars = balance_chart.find_element_by_css_selector('.bar')
+        self.assertEqual(bars[0].get_attribute('date', datetime.date.today().isoformat()))
+        self.assertEqual(bars[0].get_attribute('balance', str(INITIAL_BALANCE)))
+        self.assertEqual(bars[1].get_attribute('date', transaction_date.isoformat()))
+        self.assertEqual(bars[1].get_attribute('balance', str(INITIAL_BALANCE + 3000)))
+        self.assertEqual(bars[7].get_attribute('date', str(datetime.date.today() + datetime.timedelta(days=7))))
+        self.assertEqual(bars[7].get_attribute('balance', str(INITIAL_BALANCE + 3000 - 719.99)))
         
         # for date in dates:
         #     if date.get_attribute('date') == transaction_date.isoformat():
