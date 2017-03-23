@@ -3,6 +3,7 @@ from unittest import mock
 from django.test import TestCase
 from voong_finance_app.tests import VoongTestCase
 from voong_finance_app.models import Transaction, Balance
+from voong_finance_app.utils import date_range
 
 class TestTransaction(TestCase):
 
@@ -208,53 +209,110 @@ class TestBalanceToDict(VoongTestCase):
         
 class TestBalanceGetBalances(VoongTestCase):
 
+    # filters balance entries between dates
+    # if no balance entries are found, find the last entry
+    # if there is no last_entry calculate balances for the given dates with initial balance 0
+    # if there is a last_entry calculate balances from the last entry to the end of the specified date_range
+    # if a balance_entry_was_found_find any missing dates
+    # if no missing dates return the balance entries
+    # if some dates are missing, then
+    # find the first filtered balance and calculate the balances from the last_entry to it, then
+    # find the last filtered balance and calculate the balances from the last filtered balance to specified end date
+    # return a list of balances
+
     def setUp(self):
-        self.patches = []
-        self.objects = self.mock('voong_finance_app.models.Balance.objects')
-        self.objects.filter.return_value = mock.Mock()
+        super(TestBalanceGetBalances, self).setUp()
         self.start = datetime.date(2017, 3, 1)
         self.end = datetime.date(2017, 3, 4)
-        self.len = self.mock('voong_finance_app.models.len')
-        self.set = self.mock('voong_finance_app.models.set')
-        self.map = self.mock('voong_finance_app.models.map')
-        self.last_entry_ = Balance(date=datetime.date(2017, 2, 26), balance=10)
+        self.dates = date_range(self.start, self.end)
+        self.balances = []
+        self.filter = self.mock('voong_finance_app.models.Balance.objects.filter')
+        self.filter.return_value = self.balances
+        self.find_missing_dates = self.mock('voong_finance_app.models.Balance.find_missing_dates')
         self.last_entry = self.mock('voong_finance_app.models.Balance.last_entry')
-        self.last_entry.return_value = self.last_entry_
         self.calculate_balances = self.mock('voong_finance_app.models.Balance.calculate_balances')
-        self.date_range = self.mock('voong_finance_app.models.date_range')
 
-    def test_all_entries_exist(self):
-        self.len.return_value = 3
+    def test_filters_balance_entries_between_dates(self):
 
-        balances = Balance.get_balances(start=self.start, end=self.end)
+        balances = Balance.get_balances(self.start, self.end)
 
-        self.objects.filter.assert_called_once_with(date__gte=self.start, date__lt=self.end)
-        self.objects.filter().order_by.assert_called_once_with('date')
-        self.assertEqual(balances, self.objects.filter().order_by.return_value)
+        Balance.objects.filter.assert_called_once_with(date__gte=self.start, date__lt=self.end)
 
-    def test_not_all_entries_exist(self):
-        self.len.return_value = 2
-        output = {'columns': ['date', 'balance'], 'values': []}
+    def test_if_no_balance_entries_are_found_find_the_last_entry(self):
 
         balances = Balance.get_balances(self.start, self.end)
 
         self.last_entry.assert_called_once_with()
-        self.date_range.assert_called_once_with(self.last_entry_.date + datetime.timedelta(days=1), self.end)
-        self.calculate_balances.assert_called_once_with(output, self.last_entry_.balance, self.date_range.return_value)
-        self.objects.filter.assert_called_with(date__gte=self.start, date__lt=self.end)
-        self.assertEqual(balances, self.objects.filter().order_by.return_value)
 
-    def test_not_all_entries_exist_an_no_last_entry(self):
-        self.len.return_value = 0
-        last_entry = None
-        self.last_entry.return_value = last_entry
-        output = {'columns': ['date', 'balance'], 'values': []}
+    def test_if_there_is_no_last_entry_calculate_balances_for_the_given_dates_with_initial_balance_0(self):
+        self.last_entry.return_value = None
 
         balances = Balance.get_balances(self.start, self.end)
 
-        self.last_entry.assert_called_once_with()
-        self.date_range.assert_called_once_with(self.start, self.end)
-        self.calculate_balances.assert_called_once_with(output, 0, self.date_range.return_value)
-        self.objects.filter.assert_called_with(date__gte=self.start, date__lt=self.end)
-        self.assertEqual(balances, self.objects.filter().order_by.return_value)
+        self.calculate_balances.assert_called_once_with(initial_balance=0, dates=self.dates)
+        
+    def test_find_the_missing_dates(self):
+
+        balances = Balance.get_balances(self.start, self.end)
+
+        Balance.find_missing_dates.assert_called_once_with(self.dates, self.balances)
+
+    def test_if_no_missing_dates_return_the_balance_entries(self):
+        self.balances = [1, 2, 3]
+        self.filter.return_value = self.balances
+        
+        balances = Balance.get_balances(self.start, self.end)
+
+        self.assertEqual(balances, self.balances)
+    
+
+    # def setUp(self):
+    #     self.patches = []
+    #     self.objects = self.mock('voong_finance_app.models.Balance.objects')
+    #     self.objects.filter.return_value = mock.Mock()
+    #     self.start = datetime.date(2017, 3, 1)
+    #     self.end = datetime.date(2017, 3, 4)
+    #     self.len = self.mock('voong_finance_app.models.len')
+    #     self.set = self.mock('voong_finance_app.models.set')
+    #     self.map = self.mock('voong_finance_app.models.map')
+    #     self.last_entry_ = Balance(date=datetime.date(2017, 2, 26), balance=10)
+    #     self.last_entry = self.mock('voong_finance_app.models.Balance.last_entry')
+    #     self.last_entry.return_value = self.last_entry_
+    #     self.calculate_balances = self.mock('voong_finance_app.models.Balance.calculate_balances')
+    #     self.date_range = self.mock('voong_finance_app.models.date_range')
+
+    # def test_all_entries_exist(self):
+    #     self.len.return_value = 3
+
+    #     balances = Balance.get_balances(start=self.start, end=self.end)
+
+    #     self.objects.filter.assert_called_once_with(date__gte=self.start, date__lt=self.end)
+    #     self.objects.filter().order_by.assert_called_once_with('date')
+    #     self.assertEqual(balances, self.objects.filter().order_by.return_value)
+
+    # def test_not_all_entries_exist(self):
+    #     self.len.return_value = 2
+    #     output = {'columns': ['date', 'balance'], 'values': []}
+
+    #     balances = Balance.get_balances(self.start, self.end)
+
+    #     self.last_entry.assert_called_once_with()
+    #     self.date_range.assert_called_once_with(self.last_entry_.date + datetime.timedelta(days=1), self.end)
+    #     self.calculate_balances.assert_called_once_with(output, self.last_entry_.balance, self.date_range.return_value)
+    #     self.objects.filter.assert_called_with(date__gte=self.start, date__lt=self.end)
+    #     self.assertEqual(balances, self.objects.filter().order_by.return_value)
+
+    # def test_not_all_entries_exist_an_no_last_entry(self):
+    #     self.len.return_value = 0
+    #     last_entry = None
+    #     self.last_entry.return_value = last_entry
+    #     output = {'columns': ['date', 'balance'], 'values': []}
+
+    #     balances = Balance.get_balances(self.start, self.end)
+
+    #     self.last_entry.assert_called_once_with()
+    #     self.date_range.assert_called_once_with(self.start, self.end)
+    #     self.calculate_balances.assert_called_once_with(output, 0, self.date_range.return_value)
+    #     self.objects.filter.assert_called_with(date__gte=self.start, date__lt=self.end)
+    #     self.assertEqual(balances, self.objects.filter().order_by.return_value)
         
