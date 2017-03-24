@@ -13,27 +13,21 @@ class Balance(models.Model):
     @classmethod
     def recalculate(cls, start, end):
         cls.objects.filter(date__gte=start).delete()
-        dates = date_range(start, end)
-        last_entry = Balance.last_entry()
-        balance = last_entry.balance if last_entry != None else 0
-        output = cls.calculate_balances({'columns': ['date', 'balance'], 'values': []}, balance, dates)
-        return output
+        return cls.get_balances(start, end)
 
     @classmethod
     def last_entry(cls):
         return cls.objects.all().order_by('date').last()
 
     @classmethod
-    def calculate_balances(cls, output, initial_balance, dates):
+    def calculate_balances(cls, dates, starting_balance):
         if len(dates) == 0:
-            return output
+            return []
         transactions = Transaction.objects.filter(date=dates[0])
-        if len(transactions):
-            initial_balance += transactions.aggregate(Sum('size'))['size__sum']
-        cls.objects.create(date=dates[0], balance=initial_balance)
-        output['values'].append([dates[0].isoformat(), initial_balance])
-        return cls.calculate_balances(output, initial_balance, dates[1:])
-
+        if len(transactions) > 0:
+            starting_balance += transactions.aggregate(Sum('size'))['size__sum']
+        return [cls.objects.create(date=dates[0], balance=starting_balance)] + cls.calculate_balances(dates[1:], starting_balance)
+            
     @staticmethod
     def to_dict(balances):
         output = {'columns': ['date', 'balance']}
@@ -42,13 +36,13 @@ class Balance(models.Model):
 
     @classmethod
     def get_balances(cls, start, end):
-        balances = cls.objects.filter(date__gte=start, date__lt=end)#.order_by('date')
+        balances = cls.objects.filter(date__gte=start, date__lt=end).order_by('date')
         if len(balances) == (end - start).days:
+            print('found all')
             return balances
         last_entry = cls.last_entry()
         if last_entry == None:
             balances = cls.calculate_balances(dates=date_range(start, end), starting_balance=0)
-            balances = balances.filter(date__gte=start, date__lt=end)
             return balances
         else:
             dates = date_range(last_entry.date + datetime.timedelta(days=1), end)
@@ -56,45 +50,6 @@ class Balance(models.Model):
             first_entry = Balance.objects.first()
             before = cls.calculate_balances(dates=date_range(start, first_entry.date), starting_balance=0)
             return before + list(balances) + after
-            #missing_dates = cls.find_missing_dates(date_range(start, end), balances)
-            
-        # if len(missing_dates) == 0:
-        #     return balances
-        # else:
-        #     entry = balances.first()
-        #     if entry:
-        #         # if a blance objects exists in this range, calculate balances before and after them
-        #         dates = date_range(start, entry.date)
-        #         output = {'columns': ['date', 'balance'], 'values': []}
-        #         cls.calculate_balances(output, 0, dates)
-
-        #         entry = balances.last()
-        #         dates = date_range(entry.date + datetime.timedelta(days=1), end)
-        #         output = {'columns': ['date', 'balance'], 'values': []}
-        #         cls.calculate_balances(output, entry.balance, dates)
-        #     else: # look back for the last entry
-        #         last_entry = cls.last_entry()
-        #         if last_entry == None:
-        #             output = {'columns': ['date', 'balance'], 'values': []}
-        #             cls.calculate_balances(output, 0, date_range(start, end))
-        #         elif last_entry < start:
-        #             output = {'columns': ['date', 'balance'], 'values': []}
-        #             dates = date_range(last_entry.date + datetime.timedelta(days=1), end)
-        #             cls.calculate_balances(output, last_entry.balance, dates)
-        #         else:
-        #             first_entry = cls.first_entry()
-        #             output = {'columns': ['date', 'balance'], 'values': []}
-        #             dates = date_range(start, first_entry.date)
-        #             cls.calculate_balances(output, 0, dates)
-            
-        # output = cls.objects.filter(date__gte=start, date__lt=end).order_by('date')
-        # return output
-
-    @staticmethod
-    def find_missing_dates(cls, dates, balances):
-        # missing_dates = filter(lambda date: len(balances.filter(date=date)) == 0, date_range(start, end))
-        pass
-        
 
 class Transaction(models.Model):
 

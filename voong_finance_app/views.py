@@ -71,11 +71,10 @@ def transaction_form(request):
         # untested
         start = convert_date_string(request.POST['chart_date_start'])
         end = convert_date_string(request.POST['chart_date_end']) + datetime.timedelta(days=1)
-        response = Balance.recalculate(date, end)
-        response['values'] = list(filter(lambda x: convert_date_string(x[0]) >= start, response['values']))
+        balances = Balance.recalculate(date, end)
         ##
         
-        return JsonResponse(response)
+        return JsonResponse(Balance.to_dict(balances))
 
 def get_balances(request):
     today = datetime.date.today()
