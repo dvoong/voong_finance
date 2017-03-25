@@ -38,7 +38,6 @@ class Balance(models.Model):
     def get_balances(cls, start, end):
         balances = cls.objects.filter(date__gte=start, date__lt=end).order_by('date')
         if len(balances) == (end - start).days:
-            print('found all')
             return balances
         last_entry = cls.last_entry()
         if last_entry == None:

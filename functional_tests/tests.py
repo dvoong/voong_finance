@@ -9,6 +9,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
 
 from django.test import LiveServerTestCase
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
@@ -156,13 +157,12 @@ class FunctionalTest(StaticLiveServerTestCase):
         self.browser.get(self.live_server_url)
 
         # instead of seeing the welcome screen he sees the existing balance chart
-        WebDriverWait(self.browser, 5).until_not(EC.presence_of_element_located(('id', 'balance-initialisation')))
-        balance_chart = self.browser.find_element_by_id('balance-chart')
+        WebDriverWait(self.browser, 1).until_not(EC.presence_of_element_located(('id', 'balance-initialisation')))
 
         # The balance chart should be centred around today
-        from selenium.webdriver.common.by import By
 
-        WebDriverWait(self.browser, 5).until(EC.visibility_of_element_located((By.CSS_SELECTOR, ".bar")))
+        balance_chart = WebDriverWait(self.browser, 5).until(EC.visibility_of_element_located(('id', "balance-chart")))
+        WebDriverWait(balance_chart, 1).until(EC.visibility_of_any_elements_located((By.CSS_SELECTOR, ".bar")))
         bars = balance_chart.find_elements_by_css_selector('.bar')
         self.assertEqual(len(bars), 28)
         bar = bars[13]
@@ -192,7 +192,14 @@ class FunctionalTest(StaticLiveServerTestCase):
 
         # david sets the date to tomorrow
         transaction_date = datetime.date.today() + datetime.timedelta(days=1)
-        year_selector.send_keys(str(transaction_date.year))
+        year_selector = transaction_form.find_element_by_id('date-selector_year');
+        self.assertEqual(year_selector.get_attribute('value'), str(today.year))
+        month_selector = transaction_form.find_element_by_id('date-selector_month');
+        self.assertEqual(month_selector.get_attribute('value'), str(today.month))
+        day_selector = transaction_form.find_element_by_id('date-selector_day');
+        self.assertEqual(day_selector.get_attribute('value'), str(today.day))
+
+        year_selector.send_keys(transaction_date.year)
         month_selector.send_keys(transaction_date.strftime("%B"))
         day_selector.send_keys(str(transaction_date.day))
 
@@ -204,60 +211,37 @@ class FunctionalTest(StaticLiveServerTestCase):
         create_transaction_btn = transaction_form.find_element_by_id('create-transaction-btn')
         create_transaction_btn.click()
 
+        import time
+        time.sleep(1)
+        
         # he sees the balance chart has been updated
-        balance_chart = self.browser.find_element_by_id(BALANCE_CHART_ID)
-        bars = balance_chart.find_element_by_css_selector('.bar')
-        self.assertEqual(bars[0].get_attribute('date', datetime.date.today().isoformat()))
-        self.assertEqual(bars[0].get_attribute('balance', str(INITIAL_BALANCE)))
-        self.assertEqual(bars[1].get_attribute('date', transaction_date.isoformat()))
-        self.assertEqual(bars[1].get_attribute('balance', str(INITIAL_BALANCE + 3000)))
-        self.assertEqual(bars[7].get_attribute('date', str(datetime.date.today() + datetime.timedelta(days=7))))
-        self.assertEqual(bars[7].get_attribute('balance', str(INITIAL_BALANCE + 3000 - 719.99)))
+        bars = self.browser.find_elements_by_css_selector('.bar')
+        self.assertEqual(bars[13].get_attribute('date'), datetime.date.today().isoformat())
+        self.assertEqual(bars[13].get_attribute('balance'), str(INITIAL_BALANCE))
+        self.assertEqual(bars[14].get_attribute('date'), transaction_date.isoformat())
+        self.assertEqual(bars[14].get_attribute('balance'), str(INITIAL_BALANCE + 3000))
+        self.assertEqual(bars[20].get_attribute('date'), str(datetime.date.today() + datetime.timedelta(days=7)))
+        self.assertEqual(bars[20].get_attribute('balance'), str(INITIAL_BALANCE + 3000 - 719.99))
         
-        # for date in dates:
-        #     if date.get_attribute('date') == transaction_date.isoformat():
-        #         break
-        
-        # david ticks the "transaction repeats" checkbox
-        # repeating_transaction_checkbox = transaction_form.find_element_by_id('repeating-transaction-checkbox')
+        # bug initialise balance on a day and make a transaction on the same day will give incorrect balances
+
+        # delete transactions
+
+        # scale rescales when min/max balance outside original range
+
+        # move forwards and backwards in time
+
+        # hover tool
+
+        # repeat transactions
+        # repeating_transaction_checkbox.find_element_by_id('repeating-transaction-checkbox')
         # repeating_transaction_checkbox.click()
-        
-        # # david selects "repeats monthly"
         # repeat_frequency_dropdown = transaction_form.find_element_by_id('repeat-frequency-dropdown')
         # Select(repeat_frequency_dropdown).select_by_visible_text('Monthly')
-
-        # bug initialise balance on a day and make a transaction on the same day will give incorrect balances
         
-        # david wants to check that this worked for future dates
-        # he clicks a button to skip ahead to the next month
-        # the charts slides along and centres on the same date (TODO: What about when the next month doesn't have the smae number of dates?
-        # probably go to the next highests date, but how to test this properly in functional tests?
-        # This kind of test is better handled by unit tests? Argument for keeping this in functional tests too. But then how to test certain dates?
-        # Would need to mock the date? Not sure you should use mocks in functional tests?
-        # How is today determined? The server date seems the most sensible. This means 'today' is not exposed by the backend
-        # Testing how the dates are manipulated feels like it should be in a functional test, having the logic here seems appropriate
-        # But it also seems appropriate to put it in unit tests for development reasons
-        # To have it in both would involve duplication in code?
-        # Should it be abstracted out of unit and functional tests?
-        # How to get the functional test to run for a given date?
-        # Need to mock the today method in the datetime module?
-        # problem: cannot mock the datetime module for the server, it's in a different python process
+        # transaction view
+
         self.assertEqual(1, 0, 'Finish functional tests')
 
     def get_first_entry_prompt(self):
         return self.browser.find_element_by_id('first-entry-prompt')
-
-    #     # OLD STUFF
-    #     # homepage shows a balance chart
-    #     self.browser.find_element_by_id('balance-chart')
-        
-    #     # # add transaction entry
-    #     # form = self.browser.find_element_by_id('transaction-form')
-    #     # date_input = form.find_element_by_name('date')
-    #     # transaction_input = form.find_element_by_name('transaction')
-    #     # description_input = form.find_element_by_name('description')
-    #     # submit = form.find_element_by_css_selector('input[type="submit"]')
-        
-    #     # date_input.send_keys('2016-08-01')
-    #     # transaction_input.send_keys('150')
-    #     # description_input.send_keys('Bank pays dividends')

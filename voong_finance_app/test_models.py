@@ -87,7 +87,7 @@ class TestBalanceGetBalances(VoongTestCase):
         self.dates = date_range(self.start, self.end)
         self.balances = []
         self.filter = self.mock('voong_finance_app.models.Balance.objects.filter')
-        self.filter.return_value = self.balances
+        self.filter.return_value.order_by.return_value = self.balances
         self.last_entry = self.mock('voong_finance_app.models.Balance.last_entry')
         self.calculate_balances = self.mock('voong_finance_app.models.Balance.calculate_balances')
         self.first = self.mock('voong_finance_app.models.Balance.objects.first')
@@ -100,7 +100,7 @@ class TestBalanceGetBalances(VoongTestCase):
 
     def test_if_all_balance_entries_are_found_return_balances(self):
         self.balances = [1, 2, 3]
-        self.filter.return_value = self.balances
+        self.filter.return_value.order_by.return_value = self.balances
         
         balances = Balance.get_balances(self.start, self.end)
 
@@ -154,7 +154,7 @@ class TestBalanceGetBalances(VoongTestCase):
         last_entry = Balance(date=datetime.date(2017, 3, 1), balance=10)
         self.first.return_value = first_entry
         self.last_entry.return_value = last_entry
-        Balance.objects.filter.return_value = ['a']
+        Balance.objects.filter.return_value.order_by.return_value = ['a']
         Balance.calculate_balances.side_effect = [['b'], ['c']]
         
         balances = Balance.get_balances(self.start, self.end)

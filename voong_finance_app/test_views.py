@@ -111,8 +111,9 @@ class TestTransactionForm(TestCase):
         self.Balance = self.BalancePatch.start()
         self.date = datetime.date(2017, 1, 24)
         self.end_date = datetime.date(2017, 12, 24)
+
         self.post_data = {
-            'type': 0,
+            'type': 1,
             'description': 'description',
             'size': 15,
             'date_year': self.date.year,
@@ -121,8 +122,9 @@ class TestTransactionForm(TestCase):
             'chart_date_start': '2017-01-21',
             'chart_date_end': '2017-02-17',
         }
+        
         self.repeat_post_data = {
-            'type': 0,
+            'type': 1,
             'description': 'description',
             'frequency': 0,
             'size': 15,
@@ -235,7 +237,7 @@ class TestTransactionFormIntegration(TestCase):
             'date_month': 1,
             'date_day': 24,
             'description': 'description',
-            'type': 0,
+            'type': 1,
             'size': 10,
             'chart_date_start': '2017-01-21',
             'chart_date_end': '2017-02-17'

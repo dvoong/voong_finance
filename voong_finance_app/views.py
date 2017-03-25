@@ -44,7 +44,7 @@ def transaction_form(request):
         if 'repeats' not in request.POST:
             transaction_type = int(request.POST['type'])
             size = abs(float(request.POST['size']))
-            if transaction_type == 0:
+            if transaction_type == 1:
                 size *= -1
                 
             transaction = Transaction.objects.create(date=date,
