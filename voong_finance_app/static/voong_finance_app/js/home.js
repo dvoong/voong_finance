@@ -4,7 +4,6 @@ function initialise(){
     var balances = balance_chart.get_balances(vf.home.create_balance_chart);
     $('#create-transaction-btn').click(function(){
 	$.get('/api/transaction-form', function(response){
-	    console.log('asdf');
 	    $('#balance-chart').append(response);
 	});
     });
