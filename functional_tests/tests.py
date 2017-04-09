@@ -175,42 +175,14 @@ class FunctionalTest(StaticLiveServerTestCase):
         calendar = self.browser.find_element_by_id('calendar')
         dates = calendar.find_element_by_css_selector('.date');
 
-        # david goes to add another transaction
-        create_transaction_btn = self.browser.find_element_by_id('create-transaction-btn')
-        create_transaction_btn.click()
-
-        # another transaction form appears
-        transaction_form = self.browser.find_element_by_id('transaction-form')
+        # add transaction for pay day
+        tomorrow = datetime.date.today() + datetime.timedelta(days=1)
+        transaction_form = TransactionForm(self.browser)
+        self.assertEqual(transaction_form.year_widget.get_attribute('value'), str(today.year))
+        self.assertEqual(transaction_form.month_widget.get_attribute('value'), str(today.month))
+        self.assertEqual(transaction_form.day_widget.get_attribute('value'), str(today.day))
+        create_transaction(transaction_form, type='Income', description='Pay Day', date=tomorrow, transaction_size=3000)
         
-        # david sets transaction type to income
-        transaction_type_dropdown = transaction_form.find_element_by_id('transaction-type-dropdown')
-        Select(transaction_type_dropdown).select_by_visible_text('Income')
-        
-        # david types name as Pay Day
-        transaction_description = transaction_form.find_element_by_id('transaction-description')
-        transaction_description.send_keys('Pay Day')
-
-        # david sets the date to tomorrow
-        transaction_date = datetime.date.today() + datetime.timedelta(days=1)
-        year_selector = transaction_form.find_element_by_id('date-selector_year');
-        self.assertEqual(year_selector.get_attribute('value'), str(today.year))
-        month_selector = transaction_form.find_element_by_id('date-selector_month');
-        self.assertEqual(month_selector.get_attribute('value'), str(today.month))
-        day_selector = transaction_form.find_element_by_id('date-selector_day');
-        self.assertEqual(day_selector.get_attribute('value'), str(today.day))
-
-        year_selector.send_keys(transaction_date.year)
-        month_selector.send_keys(transaction_date.strftime("%B"))
-        day_selector.send_keys(str(transaction_date.day))
-
-        # david enters the amount as 3000
-        transaction_size_input = transaction_form.find_element_by_id('transaction-size-input')
-        transaction_size_input.send_keys('3000')
-        
-        # david clicks the create transaction button
-        create_transaction_btn = transaction_form.find_element_by_id('create-transaction-btn')
-        create_transaction_btn.click()
-
         import time
         time.sleep(1)
         
@@ -218,13 +190,16 @@ class FunctionalTest(StaticLiveServerTestCase):
         bars = self.browser.find_elements_by_css_selector('.bar')
         self.assertEqual(bars[13].get_attribute('date'), datetime.date.today().isoformat())
         self.assertEqual(bars[13].get_attribute('balance'), str(INITIAL_BALANCE))
-        self.assertEqual(bars[14].get_attribute('date'), transaction_date.isoformat())
+        self.assertEqual(bars[14].get_attribute('date'), tomorrow.isoformat())
         self.assertEqual(bars[14].get_attribute('balance'), str(INITIAL_BALANCE + 3000))
         self.assertEqual(bars[20].get_attribute('date'), str(datetime.date.today() + datetime.timedelta(days=7)))
         self.assertEqual(bars[20].get_attribute('balance'), str(INITIAL_BALANCE + 3000 - 719.99))
         
-        # bug initialise balance on a day and make a transaction on the same day will give incorrect balances
+        # bug: Add transaction on initialise date will remove the initialisation
+        create_transaction(TransactionForm(self.browser), type='Expense', description='Chicken', date=self.today, transaction_size=2.99)
 
+        time.sleep(30)
+        
         # delete transactions
 
         # scale rescales when min/max balance outside original range
@@ -245,3 +220,30 @@ class FunctionalTest(StaticLiveServerTestCase):
 
     def get_first_entry_prompt(self):
         return self.browser.find_element_by_id('first-entry-prompt')
+
+def create_transaction(form, type, description, date, transaction_size):
+
+        Select(form.type_widget).select_by_visible_text(type)
+        form.description_widget.send_keys(description)
+        form.year_widget.send_keys(date.year)
+        form.month_widget.send_keys(date.strftime("%B"))
+        form.day_widget.send_keys(str(date.day))
+        form.transaction_size_widget.send_keys(str(transaction_size))
+        form.create_transaction_btn.click()
+    
+class TransactionForm:
+
+    def __init__(self, browser):
+        browser.find_element_by_id('create-transaction-btn').click()
+        self.form = browser.find_element_by_id('transaction-form')
+        self.type_widget = self.form.find_element_by_id('transaction-type-dropdown')
+        self.description_widget = self.form.find_element_by_id('transaction-description')
+        self.year_widget = self.form.find_element_by_id('date-selector_year');
+        self.month_widget = self.form.find_element_by_id('date-selector_month');
+        self.day_widget = self.form.find_element_by_id('date-selector_day');
+        self.transaction_size_widget = self.form.find_element_by_id('transaction-size-input')
+        self.create_transaction_btn = self.form.find_element_by_id('create-transaction-btn')
+
+class BalanceChart:
+
+    pass
