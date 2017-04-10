@@ -15,23 +15,13 @@ def home(request):
 def initialise_balance(request):
     data = request.POST
     if 'date' in data and data['date'] != '':
-        date = datetime.datetime.strptime(data['date'], '%Y-%m-%d').date()
+        date = convert_date_string(data['date'])
     else:
         date = datetime.date.today()
 
-    # create a initialise_balance transaction
-    # call get_balances from date to 28 days in the future
-        
-    date_str = date.isoformat()
-    balance = float(request.POST['balance'])
-    for i in range(28):
-        Balance.objects.create(date=date + datetime.timedelta(days=i), balance=balance)
-    output = {
-        'columns': ['date', 'balance'],
-        'values': [(balance.date.isoformat(), balance.balance) for balance in Balance.objects.all().order_by('date')]
-    }
-    return JsonResponse(output)
-    return JsonResponse({'date': date_str, 'balance': balance})
+    Transaction.objects.create(type='Initialisation', description='Initialisation', date=date, size=float(request.POST['balance']))
+    balances = Balance.get_balances(start=date, end=date + datetime.timedelta(days=28))
+    return JsonResponse(Balance.to_dict(balances))
 
 def transaction_form(request):
     if request.method == 'GET':

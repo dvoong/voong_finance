@@ -187,18 +187,20 @@ class FunctionalTest(StaticLiveServerTestCase):
         time.sleep(1)
         
         # he sees the balance chart has been updated
-        bars = self.browser.find_elements_by_css_selector('.bar')
-        self.assertEqual(bars[13].get_attribute('date'), datetime.date.today().isoformat())
-        self.assertEqual(bars[13].get_attribute('balance'), str(INITIAL_BALANCE))
-        self.assertEqual(bars[14].get_attribute('date'), tomorrow.isoformat())
-        self.assertEqual(bars[14].get_attribute('balance'), str(INITIAL_BALANCE + 3000))
-        self.assertEqual(bars[20].get_attribute('date'), str(datetime.date.today() + datetime.timedelta(days=7)))
-        self.assertEqual(bars[20].get_attribute('balance'), str(INITIAL_BALANCE + 3000 - 719.99))
+        balance_chart = BalanceChart(self.browser)
+        self.assertEqual(balance_chart.dates[13], self.today)
+        self.assertEqual(balance_chart.balances[13], INITIAL_BALANCE)
+        self.assertEqual(balance_chart.dates[14], tomorrow)
+        self.assertEqual(balance_chart.balances[14], INITIAL_BALANCE + 3000)
+        self.assertEqual(balance_chart.dates[20], datetime.date.today() + datetime.timedelta(days=7))
+        self.assertEqual(balance_chart.balances[20], INITIAL_BALANCE + 3000 - 719.99)
         
         # bug: Add transaction on initialise date will remove the initialisation
         create_transaction(TransactionForm(self.browser), type='Expense', description='Chicken', date=self.today, transaction_size=2.99)
+        time.sleep(1)
 
-        time.sleep(30)
+        balance_chart = BalanceChart(self.browser)
+        self.assertEqual(balance_chart.dict[self.today],INITIAL_BALANCE - 2.99)
         
         # delete transactions
 
@@ -246,4 +248,9 @@ class TransactionForm:
 
 class BalanceChart:
 
-    pass
+    def __init__(self, browser):
+        self.balance_chart = wait_for_element_with_id(browser, 'balance-chart')
+        self.bars = self.balance_chart.find_elements_by_css_selector('.bar')
+        self.dates = [datetime.datetime.strptime(bar.get_attribute('date'), '%Y-%m-%d').date() for bar in self.bars]
+        self.balances = [float(bar.get_attribute('balance')) for bar in self.bars]        
+        self.dict = {date: balance for date, balance in zip(self.dates, self.balances)}
