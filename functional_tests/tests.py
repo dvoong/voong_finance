@@ -1,6 +1,5 @@
 # Unit tests tell a developer that the code is doing things right; functional tests tell a developer that the code is doing the right things.
-
-import datetime
+import datetime, time
 from django.test import TestCase
 
 # Create your tests here.
@@ -196,7 +195,9 @@ class FunctionalTest(StaticLiveServerTestCase):
         self.assertEqual(balance_chart.balances[20], INITIAL_BALANCE + 3000 - 719.99)
         
         # bug: Add transaction on initialise date will remove the initialisation
-        create_transaction(TransactionForm(self.browser), type='Expense', description='Chicken', date=self.today, transaction_size=2.99)
+        print('today:', self.today)
+        transaction_form = TransactionForm(self.browser)
+        create_transaction(transaction_form, type='Expense', description='Chicken', date=self.today, transaction_size=2.99)
         time.sleep(1)
 
         balance_chart = BalanceChart(self.browser)
@@ -224,20 +225,28 @@ class FunctionalTest(StaticLiveServerTestCase):
         return self.browser.find_element_by_id('first-entry-prompt')
 
 def create_transaction(form, type, description, date, transaction_size):
-
-        Select(form.type_widget).select_by_visible_text(type)
-        form.description_widget.send_keys(description)
-        form.year_widget.send_keys(date.year)
-        form.month_widget.send_keys(date.strftime("%B"))
-        form.day_widget.send_keys(str(date.day))
-        form.transaction_size_widget.send_keys(str(transaction_size))
-        form.create_transaction_btn.click()
+    print('create_transaction')
+    print('date:', date)
+    
+    Select(form.type_widget).select_by_visible_text(type)
+    form.description_widget.send_keys(description)
+    form.year_widget.send_keys(date.year)
+    form.month_widget.send_keys(date.strftime("%B"))
+    print(str(date.day))
+    print(form.day_widget.get_attribute('value'))
+    form.day_widget.send_keys(str(date.day))
+    print(str(date.day))
+    print(form.day_widget.get_attribute('value'))
+    
+    form.transaction_size_widget.send_keys(str(transaction_size))
+    time.sleep(5)
+    form.create_transaction_btn.click()
     
 class TransactionForm:
 
     def __init__(self, browser):
         browser.find_element_by_id('create-transaction-btn').click()
-        self.form = browser.find_element_by_id('transaction-form')
+        self.form = WebDriverWait(browser, timeout=5).until(lambda b: b.find_element_by_id('transaction-form'))
         self.type_widget = self.form.find_element_by_id('transaction-type-dropdown')
         self.description_widget = self.form.find_element_by_id('transaction-description')
         self.year_widget = self.form.find_element_by_id('date-selector_year');

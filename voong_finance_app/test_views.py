@@ -192,32 +192,7 @@ class TestTransactionForm(TestCase):
                                                            description=self.post_data['description'],
                                                            date=self.date,
                                                            size=-1 * self.post_data['size'])
-        
-    def test_if_repeat_is_on_then_creates_a_repeat_transaction_object(self, render, TransactionForm):
-        post_data = self.repeat_post_data
-        self.post_request.POST = post_data
 
-        views.transaction_form(self.post_request)
-
-        self.RepeatTransaction.assert_called_with(date=self.date,
-                                                  type=post_data['type'],
-                                                  description=post_data['description'],
-                                                  size=post_data['size'],
-                                                  frequency=post_data['frequency'],
-                                                  end_date=self.end_date)
-
-    def test_if_repeat_is_on_then_creates_transactions_up_to_the_latest_balance_entry(self, render, TransactionForm):
-        repeat_transaction = mock.Mock()
-        last_entry = mock.Mock()
-        self.post_request.POST = self.repeat_post_data
-        self.RepeatTransaction.return_value = repeat_transaction
-        self.Balance.last_entry.return_value = last_entry
-
-        views.transaction_form(self.post_request)
-
-        repeat_transaction.create_transactions.assert_called_with(repeat_transaction.date, last_entry.date)
-
-    ####
     def test_recalculates_balances_from_transaction_date_to_the_end_of_the_chart_range(self, render, TransactionForm):
 
         views.transaction_form(self.post_request)

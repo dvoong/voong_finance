@@ -31,33 +31,18 @@ def transaction_form(request):
         month = int(request.POST['date_month'])
         day = int(request.POST['date_day'])
         date = datetime.date(year, month, day)
-        if 'repeats' not in request.POST:
-            transaction_type = int(request.POST['type'])
-            size = abs(float(request.POST['size']))
-            if transaction_type == 1:
-                size *= -1
+        transaction_type = int(request.POST['type'])
+        size = abs(float(request.POST['size']))
+        if transaction_type == 1:
+            size *= -1
                 
-            transaction = Transaction.objects.create(date=date,
-                                                     description=request.POST['description'],
-                                                     type=transaction_type,
-                                                     size=size)
-            # create transaction
-            # add transaction to future balance entries and the entry for the transaction date
-            # 
-        else:
-            year = request.POST['end_date_year']
-            month = request.POST['end_date_month']
-            day = request.POST['end_date_day']
-            end_date = datetime.date(year, month, day)
-            transaction = RepeatTransaction(description=request.POST['description'],
-                                            date=date,
-                                            frequency=request.POST['frequency'],
-                                            size=request.POST['size'],
-                                            type=request.POST['type'],
-                                            end_date=end_date)
+        transaction = Transaction.objects.create(date=date,
+                                                 description=request.POST['description'],
+                                                 type=transaction_type,
+                                                 size=size)
 
-            transaction.create_transactions(transaction.date, Balance.last_entry().date)
-
+        for t in Transaction.objects.all():
+            print('{}: {}, {}, {}'.format(t.date, t.type, t.description, t.size))
         # untested
         start = convert_date_string(request.POST['chart_date_start'])
         end = convert_date_string(request.POST['chart_date_end']) + datetime.timedelta(days=1)
