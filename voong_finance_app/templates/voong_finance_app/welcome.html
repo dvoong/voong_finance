@@ -1,35 +1,67 @@
 <html>
-  <head>
-    <title>Voong Finance</title>
-    <link rel="stylesheet" href="https://bootswatch.com/flatly/bootstrap.min.css">
-  </head>
-  <body>
-    <div id='navbar'>
-      <div id='logo'></div>
-      <button id='create-transaction-btn' type='button'>Create Transaction</button>
-    </div>
-    <h1>Welcome</h1>
-    <div id='balance-initialisation'>
-      <form onsubmit='return false;'>
-	{% csrf_token %}
-	<input id='input' type='number' name='initial-balance'>
-	<input id='date'>
-	<input id='submit-button' type='submit' value='Submit'>
-      </form>
-    </div>
-    <div id="balance-chart"></div>
-    <div id='calendar'></div>
+<head lang="en">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    <script src="http://code.jquery.com/jquery.min.js"></script>    
-    {% load static %}
-    <script src='{% static "voong_finance_app/js/vf.js" %}'></script>
-    <script src='{% static "voong_finance_app/js/balance_initialisation.js" %}'></script>
-    <script src='{% static "voong_finance_app/js/balance_chart.js" %}'></script>
-    <script src='{% static "voong_finance_app/js/home.js" %}'></script>
-    <script src='{% static "voong_finance_app/js/transactions.js" %}'></script>
-    <script src='{% static "voong_finance/js/d3.js" %}'></script>
-    <script>
-      balance_initialisation_form = new balance_initialisation.BalanceInitialisation();
-    </script>
-  </body>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
+  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js" integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4" crossorigin="anonymous"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js" integrity="sha384-h0AbiXch4ZDo7tp9hKZ4TsHbi047NrKGLO3SEJAg45jXxnGIfYzk4Si90RDIqNm1" crossorigin="anonymous"></script>
+  <link href="https://maxcdn.bootstrapcdn.com/bootswatch/3.3.7/yeti/bootstrap.min.css" rel="stylesheet" integrity="sha384-HzUaiJdCTIY/RL2vDPRGdEQHHahjzwoJJzGUkYjHVzTwXFQ2QN/nVgX7tzoMW3Ov" crossorigin="anonymous">  <title>Voong Finance</title>
+
+  <style>
+    div {
+      text-align: center;
+      margin-top: 100px;
+    }
+  </style>
+</head>
+
+<body>
+<div class="container">
+  <h2>Welcome to Voong Finance!</h2>
+  <p>Sign in or register to get started</p>
+  <a href="registration">
+    <button id="registration-button" type="button" class="btn btn-primary">Register</button>
+  </a>
+  <button id="signin-button" type="button" class="btn btn-primary">Sign In</button>
+</div>
+
+</body>
 </html>
+
+<!--<html>-->
+<!--<head>-->
+<!--<title>Voong Finance</title>-->
+<!--<link rel="stylesheet" href="https://bootswatch.com/flatly/bootstrap.min.css">-->
+<!--</head>-->
+<!--<body>-->
+<!--<div id='navbar'>-->
+<!--<div id='logo'></div>-->
+<!--<button id='create-transaction-btn' type='button'>Create Transaction</button>-->
+<!--</div>-->
+<!--<h1>Welcome</h1>-->
+<!--<div id='balance-initialisation'>-->
+<!--<form onsubmit='return false;'>-->
+<!--{% csrf_token %}-->
+<!--<input id='input' type='number' name='initial-balance'>-->
+<!--<input id='date'>-->
+<!--<input id='submit-button' type='submit' value='Submit'>-->
+<!--</form>-->
+<!--</div>-->
+<!--<div id="balance-chart"></div>-->
+<!--<div id='calendar'></div>-->
+
+<!--<script src="http://code.jquery.com/jquery.min.js"></script>    -->
+<!--{% load static %}-->
+<!--<script src='{% static "voong_finance_app/js/vf.js" %}'></script>-->
+<!--<script src='{% static "voong_finance_app/js/balance_initialisation.js" %}'></script>-->
+<!--<script src='{% static "voong_finance_app/js/balance_chart.js" %}'></script>-->
+<!--<script src='{% static "voong_finance_app/js/home.js" %}'></script>-->
+<!--<script src='{% static "voong_finance_app/js/transactions.js" %}'></script>-->
+<!--<script src='{% static "voong_finance/js/d3.js" %}'></script>-->
+<!--<script>-->
+<!--balance_initialisation_form = new balance_initialisation.BalanceInitialisation();-->
+<!--</script>-->
+<!--</body>-->
+<!--</html>-->
