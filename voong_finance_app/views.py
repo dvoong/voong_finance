@@ -7,6 +7,9 @@ def welcome(request):
 def registration(request):
     return render(request, 'voong_finance_app/registration.html')
 
+def signin(request):
+    return render(request, 'voong_finance_app/signin.html')
+
 # import datetime
 # from django.http import HttpResponse, JsonResponse
 # from django.shortcuts import render

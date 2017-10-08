@@ -14,6 +14,18 @@ class TestRegistration(TestCase):
         response = self.client.get('/registration')
         self.assertTemplateUsed(response, 'voong_finance_app/registration.html')
 
+class TestSignin(TestCase):
+
+    def setUp(self):
+        self.client = Client()
+
+    def test_url_resolve(self):
+        self.assertEqual(resolve('/signin').func, views.signin)
+
+    def test_template(self):
+        response = self.client.get('/signin')
+        self.assertTemplateUsed(response, 'voong_finance_app/signin.html')
+
 # import datetime
 # import json
 # from datetime import date

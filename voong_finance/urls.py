@@ -18,8 +18,9 @@ from django.contrib import admin
 from voong_finance_app import views
 
 urlpatterns = [
-    url(r'^$', views.welcome),
-    url(r'registration', views.registration),
+    url(r'^$', views.welcome, name='welcome'),
+    url(r'registration', views.registration, name='registration'),
+    url(r'signin', views.signin, name='signin'),
     url(r'^app/', include('voong_finance_app.urls')),
     url(r'^api/', include('voong_finance_app.urls')),
     url(r'^admin/', admin.site.urls),

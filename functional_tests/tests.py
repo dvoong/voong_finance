@@ -33,12 +33,23 @@ class FunctionalTest(TestCase):
         # user verifies the email belongs to them
 
         # user reloads homepage
-
+        self.browser.get('http://localhost:8000')
+        
         # user clicks sign in button
+        self.browser.find_element_by_id('signin-button').click()
+        self.assertEqual(self.browser.current_url, 'http://localhost:8000/signin')
 
         # user enters their details and signs in
+        signin_form = self.browser.find_element_by_id('signin-form')
+        signin_form.find_element_by_id('email-input').send_keys('voong.david@gmail.com')
+        signin_form.find_element_by_id('password').send_keys('password')
+        signin_form.find_element_by_id('submit-button').click()
 
         # user is redirected to their homepage
+        self.assertEqual(self.browser.current_url, 'http://localhost:8000')
+        balance_chart = self.browser.find_element_by_id('balance-chart')
+        transaction_table = self.browser.find_element_by_id('transaction-table')
+        transaction_form = self.browser.find_element_by_id('transaction-form')
 
 # Unit tests tell a developer that the code is doing things right; functional tests tell a developer that the code is doing the right things.
 # import datetime, time
