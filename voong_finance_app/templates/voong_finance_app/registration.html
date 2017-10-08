@@ -10,20 +10,62 @@
   <link href="https://maxcdn.bootstrapcdn.com/bootswatch/3.3.7/yeti/bootstrap.min.css" rel="stylesheet" integrity="sha384-HzUaiJdCTIY/RL2vDPRGdEQHHahjzwoJJzGUkYjHVzTwXFQ2QN/nVgX7tzoMW3Ov" crossorigin="anonymous">  <title>Voong Finance</title>
 
   <style>
-    div {
-      text-align: center;
+    #main-container{
       margin-top: 100px;
+    }
+
+    #registration-form {
+      margin-top: 50px;
     }
   </style>
 </head>
 
 <body>
-<div class="container">
-  <h2>Register for Voong Finance</h2>
+<div id="main-container" class="container">
+  <h2 style="text-align: center;">Register for Voong Finance</h2>
   <form id="registration-form">
-    <input id="first-name-input">
-    <input id="last-name-input">
-    <input id="email-input" type="email">
+    <div class="form-group row">
+      <label for="first-name-input" class="col-2 col-form-label">First Name</label>
+      <div class="col-10">
+        <input id="first-name-input" class="form-control" type="text">
+      </div>
+    </div>
+
+    <div class="form-group row">
+      <label for="last-name-input" class="col-2 col-form-label">Last Name</label>
+      <div class="col-10">
+        <input id="last-name-input" class="form-control" type="text">
+      </div>
+    </div>
+
+    <div class="form-group row">
+      <label for="email-input" class="col-2 col-form-label">Email</label>
+      <div class="col-10">
+        <input id="email-input" type="email" class="form-control">
+      </div>
+    </div>
+
+    <div class="form-group row">
+      <label for="password-input" class="col-2 col-form-label">Password</label>
+      <div class="col-10">
+        <input id="password-input" type="password" class="form-control">
+      </div>
+    </div>
+
+    <div class="form-group row">
+      <label for="re-password-input" class="col-2 col-form-label">Re Type Password</label>
+      <div class="col-10">
+        <input id="re-password-input" type="password" class="form-control">
+      </div>
+    </div>
+
+    <div class="form-group row">
+      <div class="col-2 col-form-label"></div>
+      <div class="col-10">
+        <button id="submit-button" class="btn btn-primary" type="submit">Register</button>
+      </div>
+    </div>
+
   </form>
 </div>
 

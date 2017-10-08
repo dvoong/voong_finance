@@ -26,7 +26,19 @@ class FunctionalTest(TestCase):
         registration_form.find_element_by_id('first-name-input').send_keys('David')
         registration_form.find_element_by_id('last-name-input').send_keys('Voong')
         registration_form.find_element_by_id('email-input').send_keys('voong.david@gmail.com')
-        registration_form.submit()
+        registration_form.find_element_by_id('password-input').send_keys('password')
+        registration_form.find_element_by_id('re-password-input').send_keys('password')
+        registration_form.find_element_by_id('submit-button').click()
+
+        # user verifies the email belongs to them
+
+        # user reloads homepage
+
+        # user clicks sign in button
+
+        # user enters their details and signs in
+
+        # user is redirected to their homepage
 
 # Unit tests tell a developer that the code is doing things right; functional tests tell a developer that the code is doing the right things.
 # import datetime, time
