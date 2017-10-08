@@ -15,11 +15,11 @@ Including another URLconf
 """
 from django.conf.urls import include, url
 from django.contrib import admin
-
-from voong_finance_app.views import welcome
+from voong_finance_app import views
 
 urlpatterns = [
-    url(r'^$', welcome),
+    url(r'^$', views.welcome),
+    url(r'registration', views.registration),
     url(r'^app/', include('voong_finance_app.urls')),
     url(r'^api/', include('voong_finance_app.urls')),
     url(r'^admin/', admin.site.urls),

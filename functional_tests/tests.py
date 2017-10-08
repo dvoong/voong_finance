@@ -22,6 +22,12 @@ class FunctionalTest(TestCase):
         registration_button.click()
         self.assertEqual(self.browser.current_url, 'http://localhost:8000/registration')
 
+        registration_form = self.browser.find_element_by_id('registration-form')
+        registration_form.find_element_by_id('first-name-input').send_keys('David')
+        registration_form.find_element_by_id('last-name-input').send_keys('Voong')
+        registration_form.find_element_by_id('email-input').send_keys('voong.david@gmail.com')
+        registration_form.submit()
+
 # Unit tests tell a developer that the code is doing things right; functional tests tell a developer that the code is doing the right things.
 # import datetime, time
 # from django.test import TestCase

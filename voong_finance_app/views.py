@@ -1,7 +1,11 @@
 from django.shortcuts import render
+from django.http import HttpResponse
 
 def welcome(request):
     return render(request, 'voong_finance_app/welcome.html')
+
+def registration(request):
+    return render(request, 'voong_finance_app/registration.html')
 
 # import datetime
 # from django.http import HttpResponse, JsonResponse
