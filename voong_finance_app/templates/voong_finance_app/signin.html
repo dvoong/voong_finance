@@ -4,17 +4,45 @@
 
 {% block style %}
 <style>
+
   #title {
   text-align: center;
-  margin-top: 50px;
+  margin-top: 100px;
   }
+
+  #signin-form {
+    margin-top: 25px;
+  }
+  
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="container">
   <h2 id="title">Sign-in to Voong Finance</h2>
-  <form id="signin-form">
+  <form id="signin-form" method="post">
+    {% csrf_token %}
+    
+    <div class="form-group row">
+      <label for="email-input" class="col-2 col-form-label">Email</label>
+      <div class="col-10">
+        <input id="email-input" type="email" class="form-control" required>
+      </div>
+    </div>
+
+    <div class="form-group row">
+      <label for="password-input" class="col-2 col-form-label">Password</label>
+      <div class="col-10">
+        <input id="password-input" type="password" class="form-control" required>
+      </div>
+    </div>
+
+    <div class="form-group row">
+      <div class="col-2 col-form-label"></div>
+      <div class="col-10">
+        <button id="submit-button" class="btn btn-primary" type="submit">Register</button>
+      </div>
+    </div>
     
   </form>
 </div>

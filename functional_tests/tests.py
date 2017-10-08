@@ -42,11 +42,11 @@ class FunctionalTest(TestCase):
         # user enters their details and signs in
         signin_form = self.browser.find_element_by_id('signin-form')
         signin_form.find_element_by_id('email-input').send_keys('voong.david@gmail.com')
-        signin_form.find_element_by_id('password').send_keys('password')
+        signin_form.find_element_by_id('password-input').send_keys('password')
         signin_form.find_element_by_id('submit-button').click()
 
         # user is redirected to their homepage
-        self.assertEqual(self.browser.current_url, 'http://localhost:8000')
+        self.assertEqual(self.browser.current_url, 'http://localhost:8000/')
         balance_chart = self.browser.find_element_by_id('balance-chart')
         transaction_table = self.browser.find_element_by_id('transaction-table')
         transaction_form = self.browser.find_element_by_id('transaction-form')

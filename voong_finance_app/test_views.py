@@ -1,6 +1,7 @@
 from django.test import TestCase, Client
 from django.urls import resolve
 from voong_finance_app import views
+from voong_finance_app.models import User
 
 class TestRegistration(TestCase):
 
@@ -25,6 +26,11 @@ class TestSignin(TestCase):
     def test_template(self):
         response = self.client.get('/signin')
         self.assertTemplateUsed(response, 'voong_finance_app/signin.html')
+
+    def test_check_credentials(self):
+        user = User.objects.create(email='voong.david@gmail.com', password='password')
+        response = self.client.post('/signin', data={'email': 'voong.david@gmail.com', 'password': 'password'})
+        self.assertRedirects(response, '/')
 
 # import datetime
 # import json

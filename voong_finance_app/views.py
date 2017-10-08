@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse
 
 def welcome(request):
@@ -8,7 +8,10 @@ def registration(request):
     return render(request, 'voong_finance_app/registration.html')
 
 def signin(request):
-    return render(request, 'voong_finance_app/signin.html')
+    if request.method == 'GET':
+        return render(request, 'voong_finance_app/signin.html')
+    elif request.method == 'POST':
+        return redirect('/')
 
 # import datetime
 # from django.http import HttpResponse, JsonResponse
