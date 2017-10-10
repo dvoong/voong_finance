@@ -3,6 +3,24 @@ from django.urls import resolve
 from voong_finance_app import views
 from voong_finance_app.models import User
 
+class HomePage(TestCase):
+
+    def setUp(self):
+        self.client = Client()
+
+    def test_url_resolve(self):
+        self.assertEqual(resolve('/home').func, views.home)
+
+    def test_template(self):
+        # setup authenticated session
+        response = self.client.get('/home')
+        self.assertTemplateUsed(response, 'voong_finance_app/home.html')
+
+    def test_if_not_authenticated_redirect_to_signin_page(self):
+        response = self.client.get('/home')
+        self.assertRedirects(response, '/welcome')
+
+        
 class TestRegistration(TestCase):
 
     def setUp(self):
@@ -15,6 +33,7 @@ class TestRegistration(TestCase):
         response = self.client.get('/registration')
         self.assertTemplateUsed(response, 'voong_finance_app/registration.html')
 
+        
 class TestSignin(TestCase):
 
     def setUp(self):
@@ -32,6 +51,7 @@ class TestSignin(TestCase):
         response = self.client.post('/signin', data={'email': 'voong.david@gmail.com', 'password': 'password'})
         self.assertRedirects(response, '/')
 
+        
 # import datetime
 # import json
 # from datetime import date

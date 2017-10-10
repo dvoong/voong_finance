@@ -4,6 +4,9 @@ from django.http import HttpResponse
 def welcome(request):
     return render(request, 'voong_finance_app/welcome.html')
 
+def home(request):
+    return render(request, 'voong_finance_app/home.html')
+
 def registration(request):
     return render(request, 'voong_finance_app/registration.html')
 
