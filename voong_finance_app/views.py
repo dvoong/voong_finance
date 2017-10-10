@@ -29,7 +29,6 @@ def signin(request):
     if request.method == 'GET':
         return render(request, 'voong_finance_app/signin.html')
     elif request.method == 'POST':
-        print('request.POST:', request.POST)
         username = request.POST['email']
         password = request.POST['password']
         user = authenticate(request, username=username, password=password)

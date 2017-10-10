@@ -1,16 +1,16 @@
-from django.test import TestCase
+from django.test import LiveServerTestCase
 from selenium import webdriver
 
-class FunctionalTest(TestCase):
+class FunctionalTest(LiveServerTestCase):
 
     def setUp(self):
         self.browser = webdriver.Chrome()
 
-    # def tearDown(self):
-    #     self.browser.quit()
+    def tearDown(self):
+        self.browser.quit()
 
     def test_first_visit_flow(self):
-        self.browser.get('http://localhost:8000')
+        self.browser.get(self.live_server_url)
         # user is taken to the splash page
         self.assertEqual(self.browser.title, 'Voong Finance')
 
@@ -20,7 +20,7 @@ class FunctionalTest(TestCase):
 
         # user clicks on the registration button and is redirected to the registration page
         registration_button.click()
-        self.assertEqual(self.browser.current_url, 'http://localhost:8000/registration')
+        self.assertEqual(self.browser.current_url, self.live_server_url + '/registration')
 
         registration_form = self.browser.find_element_by_id('registration-form')
         registration_form.find_element_by_id('first-name-input').send_keys('David')
@@ -30,16 +30,16 @@ class FunctionalTest(TestCase):
         registration_form.find_element_by_id('re-password-input').send_keys('password')
         registration_form.find_element_by_id('submit-button').click()
 
-        self.assertEqual(self.browser.current_url, 'http://localhost:8000/signin')
+        self.assertEqual(self.browser.current_url, self.live_server_url + '/signin')
 
         # user verifies the email belongs to them
 
         # user reloads homepage
-        self.browser.get('http://localhost:8000')
+        self.browser.get(self.live_server_url)
         
         # user clicks sign in button
         self.browser.find_element_by_id('signin-button').click()
-        self.assertEqual(self.browser.current_url, 'http://localhost:8000/signin')
+        self.assertEqual(self.browser.current_url, self.live_server_url + '/signin')
 
         # user enters their details and signs in
         signin_form = self.browser.find_element_by_id('signin-form')
@@ -48,7 +48,7 @@ class FunctionalTest(TestCase):
         signin_form.find_element_by_id('submit-button').click()
 
         # user is redirected to their homepage
-        self.assertEqual(self.browser.current_url, 'http://localhost:8000/home')
+        self.assertEqual(self.browser.current_url, self.live_server_url + '/home')
         balance_chart = self.browser.find_element_by_id('balance-chart')
         transaction_table = self.browser.find_element_by_id('transaction-table')
         transaction_form = self.browser.find_element_by_id('transaction-form')
