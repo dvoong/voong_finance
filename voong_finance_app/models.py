@@ -1,9 +1,11 @@
-from django.db import models
+from django.contrib.auth.models import User
 
-class User(models.Model):
+# from django.db import models
 
-    email = models.EmailField()
-    password = models.CharField(max_length=100)
+# class User(models.Model):
+
+#     email = models.EmailField()
+#     password = models.CharField(max_length=100)
 
 # import json
 # import datetime

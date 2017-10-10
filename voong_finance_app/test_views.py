@@ -2,6 +2,7 @@ from django.test import TestCase, Client
 from django.urls import resolve
 from voong_finance_app import views
 from voong_finance_app.models import User
+from django.contrib.auth import authenticate, login
 
 class HomePage(TestCase):
 
@@ -12,13 +13,18 @@ class HomePage(TestCase):
         self.assertEqual(resolve('/home').func, views.home)
 
     def test_template(self):
-        # setup authenticated session
+        username = 'voong.david@gmail.com'
+        password = 'password'
+        user = User.objects.create_user(username=username, first_name='David', last_name='Voong', email=username, password=password)
+        login = self.client.login(username=username, password=password)
+        
         response = self.client.get('/home')
+
         self.assertTemplateUsed(response, 'voong_finance_app/home.html')
 
     def test_if_not_authenticated_redirect_to_signin_page(self):
         response = self.client.get('/home')
-        self.assertRedirects(response, '/welcome')
+        self.assertRedirects(response, '/signin')
 
         
 class TestRegistration(TestCase):
@@ -33,6 +39,28 @@ class TestRegistration(TestCase):
         response = self.client.get('/registration')
         self.assertTemplateUsed(response, 'voong_finance_app/registration.html')
 
+    def test_post_registration_form(self):
+        data = {
+            'first-name': 'David',
+            'last-name': 'Voong',
+            'email': 'voong.david@gmail.com',
+            'password': 'password'
+        }
+        
+        response = self.client.post('/registration', data)
+        
+        users = User.objects.all()
+
+        self.assertEqual(len(users), 1)
+
+        user = users[0]
+        self.assertEqual(user.first_name, 'David')
+        self.assertEqual(user.last_name, 'Voong')
+        self.assertEqual(user.email, 'voong.david@gmail.com')
+        self.assertTrue(user.check_password('password'))
+        self.assertEqual(user.username, 'voong.david@gmail.com')
+        self.assertRedirects(response, '/signin')
+        
         
 class TestSignin(TestCase):
 
@@ -47,9 +75,13 @@ class TestSignin(TestCase):
         self.assertTemplateUsed(response, 'voong_finance_app/signin.html')
 
     def test_check_credentials(self):
-        user = User.objects.create(email='voong.david@gmail.com', password='password')
-        response = self.client.post('/signin', data={'email': 'voong.david@gmail.com', 'password': 'password'})
-        self.assertRedirects(response, '/')
+        email = 'voong.david@gmail.com'
+        password = 'password'
+        
+        user = User.objects.create_user(email=email, password=password, username=email)
+        response = self.client.post('/signin', data={'email': email, 'password': password})
+        self.assertRedirects(response, '/home')
+        self.assertEqual(int(self.client.session['_auth_user_id']), user.pk)
 
         
 # import datetime

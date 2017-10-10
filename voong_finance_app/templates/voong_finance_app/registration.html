@@ -18,33 +18,34 @@
 <div id="main-container" class="container">
   <h2 style="text-align: center;">Register for Voong Finance</h2>
   
-  <form id="registration-form">
+  <form id="registration-form" method="post">
+    {% csrf_token %}
     
     <div class="form-group row">
       <label for="first-name-input" class="col-2 col-form-label">First Name</label>
       <div class="col-10">
-        <input id="first-name-input" class="form-control" type="text" required>
+        <input id="first-name-input" class="form-control" type="text" name="first-name" required>
       </div>
     </div>
 
     <div class="form-group row">
       <label for="last-name-input" class="col-2 col-form-label">Last Name</label>
       <div class="col-10">
-        <input id="last-name-input" class="form-control" type="text" required>
+        <input id="last-name-input" class="form-control" type="text" name="last-name" required>
       </div>
     </div>
 
     <div class="form-group row">
       <label for="email-input" class="col-2 col-form-label">Email</label>
       <div class="col-10">
-        <input id="email-input" type="email" class="form-control" required>
+        <input id="email-input" type="email" class="form-control" name="email" required>
       </div>
     </div>
 
     <div class="form-group row">
       <label for="password-input" class="col-2 col-form-label">Password</label>
       <div class="col-10">
-        <input id="password-input" type="password" class="form-control" required>
+        <input id="password-input" type="password" class="form-control" name="password" required>
       </div>
     </div>
 

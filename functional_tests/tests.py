@@ -6,8 +6,8 @@ class FunctionalTest(TestCase):
     def setUp(self):
         self.browser = webdriver.Chrome()
 
-    def tearDown(self):
-        self.browser.quit()
+    # def tearDown(self):
+    #     self.browser.quit()
 
     def test_first_visit_flow(self):
         self.browser.get('http://localhost:8000')
@@ -30,6 +30,8 @@ class FunctionalTest(TestCase):
         registration_form.find_element_by_id('re-password-input').send_keys('password')
         registration_form.find_element_by_id('submit-button').click()
 
+        self.assertEqual(self.browser.current_url, 'http://localhost:8000/signin')
+
         # user verifies the email belongs to them
 
         # user reloads homepage
@@ -46,7 +48,7 @@ class FunctionalTest(TestCase):
         signin_form.find_element_by_id('submit-button').click()
 
         # user is redirected to their homepage
-        self.assertEqual(self.browser.current_url, 'http://localhost:8000/')
+        self.assertEqual(self.browser.current_url, 'http://localhost:8000/home')
         balance_chart = self.browser.find_element_by_id('balance-chart')
         transaction_table = self.browser.find_element_by_id('transaction-table')
         transaction_form = self.browser.find_element_by_id('transaction-form')

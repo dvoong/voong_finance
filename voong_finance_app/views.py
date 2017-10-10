@@ -1,20 +1,43 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
+from voong_finance_app.models import User
+from django.contrib.auth import authenticate, login
 
 def welcome(request):
     return render(request, 'voong_finance_app/welcome.html')
 
 def home(request):
-    return render(request, 'voong_finance_app/home.html')
+    if request.user.is_authenticated:
+        return render(request, 'voong_finance_app/home.html')
+    else:
+        return redirect('/signin')
 
 def registration(request):
-    return render(request, 'voong_finance_app/registration.html')
+    
+    if request.method == 'GET':
+        return render(request, 'voong_finance_app/registration.html')
+        
+    elif request.method == 'POST':
+        first_name = request.POST['first-name']
+        last_name = request.POST['last-name']
+        email = request.POST['email']
+        password = request.POST['password']
+        User.objects.create_user(first_name=first_name, last_name=last_name, email=email, password=password, username=email)
+        return redirect('/signin')
 
 def signin(request):
     if request.method == 'GET':
         return render(request, 'voong_finance_app/signin.html')
     elif request.method == 'POST':
-        return redirect('/')
+        print('request.POST:', request.POST)
+        username = request.POST['email']
+        password = request.POST['password']
+        user = authenticate(request, username=username, password=password)
+        if user:
+            login(request, user)
+            return redirect('/home')
+        else:
+            return
 
 # import datetime
 # from django.http import HttpResponse, JsonResponse
