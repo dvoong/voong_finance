@@ -1,3 +1,4 @@
+import datetime
 from django.test import TestCase, Client
 from django.urls import resolve
 from voong_finance_app import views
@@ -21,6 +22,7 @@ class HomePage(TestCase):
         response = self.client.get('/home')
 
         self.assertTemplateUsed(response, 'voong_finance_app/home.html')
+        self.assertEqual(response.context['today'], datetime.date.today().isoformat())
 
     def test_if_not_authenticated_redirect_to_signin_page(self):
         response = self.client.get('/home')

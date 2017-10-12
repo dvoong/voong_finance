@@ -1,3 +1,4 @@
+import datetime
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from voong_finance_app.models import User
@@ -8,7 +9,7 @@ def welcome(request):
 
 def home(request):
     if request.user.is_authenticated:
-        return render(request, 'voong_finance_app/home.html')
+        return render(request, 'voong_finance_app/home.html', context={'today': datetime.date.today().isoformat()})
     else:
         return redirect('/signin')
 

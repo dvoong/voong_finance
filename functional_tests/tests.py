@@ -1,5 +1,7 @@
+import datetime
 from django.test import LiveServerTestCase
 from selenium import webdriver
+from selenium.webdriver.support.ui import Select
 
 class FunctionalTest(LiveServerTestCase):
 
@@ -53,6 +55,22 @@ class FunctionalTest(LiveServerTestCase):
         balance_chart = self.browser.find_element_by_id('balance-chart')
         transaction_table = self.browser.find_element_by_id('transaction-table')
         transaction_form = self.browser.find_element_by_id('transaction-form')
+
+
+        date_input = transaction_form.find_element_by_id('date-input')
+        self.assertEqual(date_input.get_attribute('value'), datetime.date.today().isoformat())
+        date_input.send_keys('2017-09-01')
+
+        type_input = transaction_form.find_element_by_id('type-input')
+        Select(type_input).select_by_visible_text('Income')
+
+        description_input = transaction_form.find_element_by_id('description-input')
+        description_input.send_keys('Description')
+
+        size_input = transaction_form.find_element_by_id('size-input')
+        size_input.send_keys(100)
+
+        transaction_form.find_element_by_id('submit-button')
 
 # Unit tests tell a developer that the code is doing things right; functional tests tell a developer that the code is doing the right things.
 # import datetime, time
