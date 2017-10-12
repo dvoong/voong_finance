@@ -12,6 +12,9 @@ class FunctionalTest(LiveServerTestCase):
         self.browser.quit()
 
     def test_first_visit_flow(self):
+
+        today = datetime.date.today()
+
         self.browser.get(self.live_server_url)
         # user is taken to the splash page
         self.assertEqual(self.browser.title, 'Voong Finance')
@@ -58,7 +61,7 @@ class FunctionalTest(LiveServerTestCase):
 
 
         date_input = transaction_form.find_element_by_id('date-input')
-        self.assertEqual(date_input.get_attribute('value'), datetime.date.today().isoformat())
+        self.assertEqual(date_input.get_attribute('value'), today.isoformat())
         date_input.send_keys('2017-09-01')
 
         type_input = transaction_form.find_element_by_id('type-input')
@@ -71,6 +74,19 @@ class FunctionalTest(LiveServerTestCase):
         size_input.send_keys(100)
 
         transaction_form.find_element_by_id('submit-button')
+
+        transactions = transaction_table.find_elements_by_css_selector('.transaction-row')
+        self.assertEqual(len(transactions), 1)
+
+        transaction_date = transactions[0].find_element_by_id('transaction-date')
+        transaction_type = transactions[0].find_element_by_id('transaction-type')
+        transaction_description= transactions[0].find_element_by_id('transaction-description')
+        transaction_size= transactions[0].find_element_by_id('transaction-size')
+
+        self.assertEqual(transaction_date.get_attribute('innerHTML'), today.isoformat())
+        self.assertEqual(transaction_type.get_attribute('innerHTML'), 'Income')
+        self.assertEqual(transaction_description.get_attribute('innerHTML'), 'Description')
+        self.assertEqual(transaction_size.get_attribute('innerHTML'), '100')
 
 # Unit tests tell a developer that the code is doing things right; functional tests tell a developer that the code is doing the right things.
 # import datetime, time
