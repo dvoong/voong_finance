@@ -48,6 +48,7 @@ class FunctionalTest(LiveServerTestCase):
         signin_form.find_element_by_id('submit-button').click()
 
         # user is redirected to their homepage
+        self.assertEqual(self.browser.title, 'Home')
         self.assertEqual(self.browser.current_url, self.live_server_url + '/home')
         balance_chart = self.browser.find_element_by_id('balance-chart')
         transaction_table = self.browser.find_element_by_id('transaction-table')
