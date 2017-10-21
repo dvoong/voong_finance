@@ -2,7 +2,7 @@ import datetime
 from django.test import TestCase, Client
 from django.urls import resolve
 from voong_finance_app import views
-from voong_finance_app.models import User
+from voong_finance_app.models import User, Transaction
 from django.contrib.auth import authenticate, login
 
 class HomePage(TestCase):
@@ -85,6 +85,38 @@ class TestSignin(TestCase):
         self.assertRedirects(response, '/home')
         self.assertEqual(int(self.client.session['_auth_user_id']), user.pk)
 
+class TestCreateTransaction(TestCase):
+
+    def setUp(self):
+        self.client = Client()
+
+    def test_url_resolve(self):
+        self.assertEqual(resolve('/create-transaction').func, views.create_transaction)
+
+    def test(self):
+        username = 'voong.david@gmail.com'
+        password = 'password'
+        user = User.objects.create_user(username=username, first_name='David', last_name='Voong', email=username, password=password)
+        login = self.client.login(username=username, password=password)
+
+        data = {
+            'date': '2017-09-01',
+            'transaction-type': 'income',
+            'description': 'description',
+            'transaction-size': '100'
+        }
+
+        response = self.client.post('/create-transaction', data=data)
+
+        transactions = Transaction.objects.all()
+        self.assertEqual(len(transactions), 1)
+        transaction = transactions[0]
+        self.assertEqual(transaction.user, user)
+        self.assertEqual(transaction.date, datetime.date(2017, 9, 1))
+        self.assertEqual(transaction.type, data['transaction-type'])
+        self.assertEqual(transaction.description, data['description'])
+        self.assertEqual(transaction.size, 100)
+        self.assertEqual(response.json(), {'status': 200})
         
 # import datetime
 # import json

@@ -1,8 +1,9 @@
 import datetime
 from django.shortcuts import render, redirect
-from django.http import HttpResponse
-from voong_finance_app.models import User
+from django.http import HttpResponse, JsonResponse
+from voong_finance_app.models import User, Transaction
 from django.contrib.auth import authenticate, login
+from django.core import serializers
 
 def welcome(request):
     return render(request, 'voong_finance_app/welcome.html')
@@ -38,6 +39,23 @@ def signin(request):
             return redirect('/home')
         else:
             return
+
+def create_transaction(request):
+    user = request.user
+    date = request.POST['date']
+    transaction_type = request.POST['transaction-type']
+    description = request.POST['description']
+    transaction_size = request.POST['transaction-size']
+
+    transaction = Transaction.objects.create(
+        user=user,
+        date=date,
+        type=transaction_type,
+        description=description,
+        size=transaction_size
+    )
+
+    return JsonResponse({'status': 200})
 
 # import datetime
 # from django.http import HttpResponse, JsonResponse

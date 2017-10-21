@@ -1,4 +1,13 @@
+from django.db import models
 from django.contrib.auth.models import User
+
+class Transaction(models.Model):
+
+    user = models.ForeignKey(User)
+    date = models.DateField()
+    type = models.CharField(max_length=100)
+    description = models.CharField(max_length=1000)
+    size = models.FloatField()
 
 # from django.db import models
 

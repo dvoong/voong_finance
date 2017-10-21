@@ -22,6 +22,7 @@ urlpatterns = [
     url(r'registration', views.registration, name='registration'),
     url(r'signin', views.signin, name='signin'),
     url(r'home', views.home, name='home'),
+    url(r'create-transaction', views.create_transaction, name='create-transaction'),
     url(r'^app/', include('voong_finance_app.urls')),
     url(r'^api/', include('voong_finance_app.urls')),
     url(r'^admin/', admin.site.urls),
