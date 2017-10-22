@@ -111,12 +111,18 @@ class TestCreateTransaction(TestCase):
         transactions = Transaction.objects.all()
         self.assertEqual(len(transactions), 1)
         transaction = transactions[0]
+
         self.assertEqual(transaction.user, user)
         self.assertEqual(transaction.date, datetime.date(2017, 9, 1))
         self.assertEqual(transaction.type, data['transaction-type'])
         self.assertEqual(transaction.description, data['description'])
         self.assertEqual(transaction.size, 100)
-        self.assertEqual(response.json(), {'status': 200})
+        self.assertEqual(response.json(), {
+            'date': data['date'],
+            'transaction_type': data['transaction-type'],
+            'description': data['description'],
+            'transaction_size': 100
+        })
         
 # import datetime
 # import json

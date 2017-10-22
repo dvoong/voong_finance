@@ -55,7 +55,14 @@ def create_transaction(request):
         size=transaction_size
     )
 
-    return JsonResponse({'status': 200})
+    transaction.refresh_from_db()
+    
+    return JsonResponse({
+        'date': transaction.date,
+        'transaction_type': transaction.type,
+        'description': transaction.description,
+        'transaction_size': transaction.size
+    })
 
 # import datetime
 # from django.http import HttpResponse, JsonResponse
