@@ -2,8 +2,9 @@ import datetime
 from django.test import LiveServerTestCase
 from selenium import webdriver
 from selenium.webdriver.support.ui import Select
+from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 
-class FunctionalTest(LiveServerTestCase):
+class FunctionalTest(StaticLiveServerTestCase):
 
     def setUp(self):
         self.browser = webdriver.Chrome()
@@ -56,7 +57,7 @@ class FunctionalTest(LiveServerTestCase):
         self.assertEqual(self.browser.title, 'Home')
         self.assertEqual(self.browser.current_url, self.live_server_url + '/home')
         balance_chart = self.browser.find_element_by_id('balance-chart')
-        transaction_table = self.browser.find_element_by_id('transaction-table')
+        transaction_table = self.browser.find_element_by_id('transactions-table')
         transaction_form = self.browser.find_element_by_id('transaction-form')
 
 
@@ -73,9 +74,9 @@ class FunctionalTest(LiveServerTestCase):
         size_input = transaction_form.find_element_by_id('size-input')
         size_input.send_keys(100)
 
-        transaction_form.find_element_by_id('submit-button')
+        transaction_form.find_element_by_id('submit-button').click()
 
-        transactions = transaction_table.find_elements_by_css_selector('.transaction-row')
+        transactions = transaction_table.find_elements_by_css_selector('.transaction')
         self.assertEqual(len(transactions), 1)
 
         transaction_date = transactions[0].find_element_by_id('transaction-date')

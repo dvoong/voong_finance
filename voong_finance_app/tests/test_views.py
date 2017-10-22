@@ -11,7 +11,9 @@ class HomePage(TestCase):
         self.client = Client()
 
     def test_url_resolve(self):
-        self.assertEqual(resolve('/home').func, views.home)
+        # self.assertEqual(resolve('/home').func, views.home)
+        response = self.client.get('/home')
+        self.assertEqual(response.resolver_match.func, views.home)
 
     def test_template(self):
         username = 'voong.david@gmail.com'

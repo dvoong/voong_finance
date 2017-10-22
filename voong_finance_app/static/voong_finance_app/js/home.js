@@ -11,8 +11,19 @@ $('#transaction-form').submit(function(e){
     console.log($(this).serializeArray());
     $.post('create-transaction', $(this).serialize())
 	.done(function(data, status, xhr){
+	    var transactions_table = d3.select('#transactions-table tbody');
+	    var selection = transactions_table.selectAll('tr.transaction')
+	    .data([data]);
+	    var enter = selection.enter();
+
+	    var transaction = enter.append('tr')
+	    .attr('class', 'transaction')
+
+
+
 	    console.log('done');
 	    console.log(data);
+	    console.log(enter);
 	});
 })
 
