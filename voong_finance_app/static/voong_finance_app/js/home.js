@@ -19,7 +19,29 @@ $('#transaction-form').submit(function(e){
 	    var transaction = enter.append('tr')
 	    .attr('class', 'transaction')
 
+	    transaction.append('td')
+		.attr('id', 'transaction-date')
+		.html(function(d){
+		    return d.date;
+		});
 
+	    transaction.append('td')
+		.attr('id', 'transaction-type')
+		.html(function(d){
+		    return d.transaction_type;
+		});
+
+	    transaction.append('td')
+		.attr('id', 'transaction-description')
+		.html(function(d){
+		    return d.description;
+		});
+
+	    transaction.append('td')
+		.attr('id', 'transaction-size')
+		.html(function(d){
+		    return d.transaction_size;
+		});
 
 	    console.log('done');
 	    console.log(data);

@@ -60,10 +60,9 @@ class FunctionalTest(StaticLiveServerTestCase):
         transaction_table = self.browser.find_element_by_id('transactions-table')
         transaction_form = self.browser.find_element_by_id('transaction-form')
 
-
         date_input = transaction_form.find_element_by_id('date-input')
         self.assertEqual(date_input.get_attribute('value'), today.isoformat())
-        date_input.send_keys('2017-09-01')
+        date_input.send_keys('{:02}{:02}{}'.format(today.day, today.month, today.year))
 
         type_input = transaction_form.find_element_by_id('type-input')
         Select(type_input).select_by_visible_text('Income')
@@ -85,7 +84,7 @@ class FunctionalTest(StaticLiveServerTestCase):
         transaction_size= transactions[0].find_element_by_id('transaction-size')
 
         self.assertEqual(transaction_date.get_attribute('innerHTML'), today.isoformat())
-        self.assertEqual(transaction_type.get_attribute('innerHTML'), 'Income')
+        self.assertEqual(transaction_type.get_attribute('innerHTML'), 'income')
         self.assertEqual(transaction_description.get_attribute('innerHTML'), 'Description')
         self.assertEqual(transaction_size.get_attribute('innerHTML'), '100')
 
