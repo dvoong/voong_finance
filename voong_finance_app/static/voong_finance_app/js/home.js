@@ -9,9 +9,15 @@ $('#transaction-form').submit(function(e){
     var args = $(this).serialize();
     $.post('create-transaction', $(this).serialize())
 	.done(function(data, status, xhr){
+
+	    console.log(data);
+	    
 	    var transactions_table = d3.select('#transactions-table tbody');
-	    var selection = transactions_table.selectAll('tr.transaction')
-	    .data([data]);
+	    var selection = transactions_table.selectAll('tr.transaction');
+	    var transactions = selection.data();
+	    transactions.push(data);
+	    
+	    var selection = selection.data(transactions);
 	    var enter = selection.enter();
 
 	    var transaction = enter.append('tr')

@@ -45,9 +45,14 @@ def create_transaction(request):
     date = request.POST['date']
     transaction_type = request.POST['transaction-type']
     description = request.POST['description']
-    transaction_size = request.POST['transaction-size']
+    transaction_size = float(request.POST['transaction-size'])
 
-    balance = 0
+    previous_transaction = Transaction.objects.filter(user=user, date__lte=date).order_by('-date', '-ordinal')[:1]
+    previous_transaction = previous_transaction[0] if len(previous_transaction) > 0 else None
+    balance = previous_transaction.balance if previous_transaction else 0
+    ordinal = len(Transaction.objects.filter(user=user, date=date))
+
+    transaction_size = transaction_size if transaction_type == 'income' else -1 * transaction_size
 
     transaction = Transaction.objects.create(
         user=user,
@@ -55,7 +60,8 @@ def create_transaction(request):
         type=transaction_type,
         description=description,
         size=transaction_size,
-        balance=balance + float(transaction_size)
+        balance=balance + float(transaction_size),
+        ordinal=ordinal
     )
 
     transaction.refresh_from_db()
@@ -65,7 +71,8 @@ def create_transaction(request):
         'transaction_type': transaction.type,
         'description': transaction.description,
         'transaction_size': transaction.size,
-        'balance': transaction.balance
+        'balance': transaction.balance,
+        'ordinal': transaction.ordinal
     })
 
 # import datetime

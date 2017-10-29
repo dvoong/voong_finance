@@ -1,7 +1,7 @@
 import datetime
 from django.test import LiveServerTestCase
 from selenium import webdriver
-from selenium.webdriver.support.ui import Select
+from selenium.webdriver.support.ui import Select, WebDriverWait
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 
 class FunctionalTest(StaticLiveServerTestCase):
@@ -76,10 +76,11 @@ class FunctionalTest(StaticLiveServerTestCase):
 
         transaction_form.find_element_by_id('submit-button').click()
 
-        # transaction table updates to show the new transaction
+        WebDriverWait(self.browser, timeout=2).until(lambda b: len(transaction_table.find_elements_by_css_selector('.transaction')) == 1)
+
         transactions = transaction_table.find_elements_by_css_selector('.transaction')
         self.assertEqual(len(transactions), 1)
-
+        
         transaction_date = transactions[0].find_element_by_id('transaction-date')
         transaction_type = transactions[0].find_element_by_id('transaction-type')
         transaction_description = transactions[0].find_element_by_id('transaction-description')
@@ -105,6 +106,7 @@ class FunctionalTest(StaticLiveServerTestCase):
         size_input.send_keys('15')
         transaction_form.find_element_by_id('submit-button').click()
 
+        WebDriverWait(self.browser, timeout=2).until(lambda b: len(transaction_table.find_elements_by_css_selector('.transaction')) == 2)
         transactions = transaction_table.find_elements_by_css_selector('.transaction')
         self.assertEqual(len(transactions), 2)
 
@@ -118,7 +120,7 @@ class FunctionalTest(StaticLiveServerTestCase):
         self.assertEqual(transaction_date.get_attribute('innerHTML'), today.isoformat())
         self.assertEqual(transaction_type.get_attribute('innerHTML'), 'expense')
         self.assertEqual(transaction_description.get_attribute('innerHTML'), 'Phone Bill')
-        self.assertEqual(transaction_size.get_attribute('innerHTML'), '15')
+        self.assertEqual(transaction_size.get_attribute('innerHTML'), '-15')
         self.assertEqual(balance.get_attribute('innerHTML'), '85')
         
 

@@ -119,12 +119,14 @@ class TestCreateTransaction(TestCase):
         self.assertEqual(transaction.type, data['transaction-type'])
         self.assertEqual(transaction.description, data['description'])
         self.assertEqual(transaction.size, 100)
+        self.assertEqual(transaction.ordinal, 0)
         self.assertEqual(response.json(), {
             'date': data['date'],
             'transaction_type': data['transaction-type'],
             'description': data['description'],
             'transaction_size': 100,
-            'balance': 100
+            'balance': 100,
+            'ordinal': 0
         })
         
 # import datetime
