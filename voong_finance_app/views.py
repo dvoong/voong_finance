@@ -47,12 +47,15 @@ def create_transaction(request):
     description = request.POST['description']
     transaction_size = request.POST['transaction-size']
 
+    balance = 0
+
     transaction = Transaction.objects.create(
         user=user,
         date=date,
         type=transaction_type,
         description=description,
-        size=transaction_size
+        size=transaction_size,
+        balance=balance + float(transaction_size)
     )
 
     transaction.refresh_from_db()
@@ -61,7 +64,8 @@ def create_transaction(request):
         'date': transaction.date,
         'transaction_type': transaction.type,
         'description': transaction.description,
-        'transaction_size': transaction.size
+        'transaction_size': transaction.size,
+        'balance': transaction.balance
     })
 
 # import datetime

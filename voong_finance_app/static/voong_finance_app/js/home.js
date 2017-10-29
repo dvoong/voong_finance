@@ -43,6 +43,12 @@ $('#transaction-form').submit(function(e){
 		    return d.transaction_size;
 		});
 
+	    transaction.append('td')
+		.attr('id', 'balance')
+		.html(function(d){
+		    return d.balance;
+		});
+
 	    console.log('done');
 	    console.log(data);
 	    console.log(enter);

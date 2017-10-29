@@ -60,6 +60,7 @@ class FunctionalTest(StaticLiveServerTestCase):
         transaction_table = self.browser.find_element_by_id('transactions-table')
         transaction_form = self.browser.find_element_by_id('transaction-form')
 
+        # user creates a new transaction
         date_input = transaction_form.find_element_by_id('date-input')
         self.assertEqual(date_input.get_attribute('value'), today.isoformat())
         date_input.send_keys('{:02}{:02}{}'.format(today.day, today.month, today.year))
@@ -75,18 +76,31 @@ class FunctionalTest(StaticLiveServerTestCase):
 
         transaction_form.find_element_by_id('submit-button').click()
 
+        # transaction table updates to show the new transaction
         transactions = transaction_table.find_elements_by_css_selector('.transaction')
         self.assertEqual(len(transactions), 1)
 
         transaction_date = transactions[0].find_element_by_id('transaction-date')
         transaction_type = transactions[0].find_element_by_id('transaction-type')
-        transaction_description= transactions[0].find_element_by_id('transaction-description')
-        transaction_size= transactions[0].find_element_by_id('transaction-size')
+        transaction_description = transactions[0].find_element_by_id('transaction-description')
+        transaction_size = transactions[0].find_element_by_id('transaction-size')
+        balance = transactions[0].find_element_by_id('balance')
 
         self.assertEqual(transaction_date.get_attribute('innerHTML'), today.isoformat())
         self.assertEqual(transaction_type.get_attribute('innerHTML'), 'income')
         self.assertEqual(transaction_description.get_attribute('innerHTML'), 'Description')
         self.assertEqual(transaction_size.get_attribute('innerHTML'), '100')
+        self.assertEqual(balance.get_attribute('innerHTML'), '100')
+
+        # the input form is cleared
+        self.assertEqual(date_input.get_attribute('value'), today.isoformat())
+        self.assertEqual(type_input.get_attribute('value', 'income'))
+        self.assertEqual(description_input.get_attribute('value', ''))
+        self.assertEqual(size_input.get_attribute('value'), '')
+
+        # user creates another transaction
+        # leaves the date as the same
+        
 
 # Unit tests tell a developer that the code is doing things right; functional tests tell a developer that the code is doing the right things.
 # import datetime, time

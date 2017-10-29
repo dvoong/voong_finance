@@ -123,7 +123,8 @@ class TestCreateTransaction(TestCase):
             'date': data['date'],
             'transaction_type': data['transaction-type'],
             'description': data['description'],
-            'transaction_size': 100
+            'transaction_size': 100,
+            'balance': 100
         })
         
 # import datetime
