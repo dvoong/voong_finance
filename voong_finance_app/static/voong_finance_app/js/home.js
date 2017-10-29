@@ -4,11 +4,9 @@ $('#transaction-form').submit(function(e){
     console.log('submit form');
     e.preventDefault();
 
-    console.log(e);
-    console.log(this);
+    var that = this;
+
     var args = $(this).serialize();
-    console.log(args);
-    console.log($(this).serializeArray());
     $.post('create-transaction', $(this).serialize())
 	.done(function(data, status, xhr){
 	    var transactions_table = d3.select('#transactions-table tbody');
@@ -49,9 +47,8 @@ $('#transaction-form').submit(function(e){
 		    return d.balance;
 		});
 
-	    console.log('done');
-	    console.log(data);
-	    console.log(enter);
+	    $(that).find('#description-input').val('');
+	    $(that).find('#size-input').val('');
 	});
 })
 

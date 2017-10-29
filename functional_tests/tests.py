@@ -94,12 +94,32 @@ class FunctionalTest(StaticLiveServerTestCase):
 
         # the input form is cleared
         self.assertEqual(date_input.get_attribute('value'), today.isoformat())
-        self.assertEqual(type_input.get_attribute('value', 'income'))
-        self.assertEqual(description_input.get_attribute('value', ''))
+        self.assertEqual(type_input.get_attribute('value'), 'income')
+        self.assertEqual(description_input.get_attribute('value'), '')
         self.assertEqual(size_input.get_attribute('value'), '')
 
         # user creates another transaction
         # leaves the date as the same
+        Select(type_input).select_by_visible_text('Expense')
+        description_input.send_keys('Phone Bill')
+        size_input.send_keys('15')
+        transaction_form.find_element_by_id('submit-button').click()
+
+        transactions = transaction_table.find_elements_by_css_selector('.transaction')
+        self.assertEqual(len(transactions), 2)
+
+        transaction = transactions[1]
+        transaction_date = transaction.find_element_by_id('transaction-date')
+        transaction_type = transaction.find_element_by_id('transaction-type')
+        transaction_description = transaction.find_element_by_id('transaction-description')
+        transaction_size = transaction.find_element_by_id('transaction-size')
+        balance = transaction.find_element_by_id('balance')
+
+        self.assertEqual(transaction_date.get_attribute('innerHTML'), today.isoformat())
+        self.assertEqual(transaction_type.get_attribute('innerHTML'), 'expense')
+        self.assertEqual(transaction_description.get_attribute('innerHTML'), 'Phone Bill')
+        self.assertEqual(transaction_size.get_attribute('innerHTML'), '15')
+        self.assertEqual(balance.get_attribute('innerHTML'), '85')
         
 
 # Unit tests tell a developer that the code is doing things right; functional tests tell a developer that the code is doing the right things.
