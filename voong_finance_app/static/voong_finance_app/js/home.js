@@ -18,9 +18,12 @@ $('#transaction-form').submit(function(e){
 	    var transactions = selection.data();
 	    transactions.push(data);
 	    transactions.sort(function(a, b){
-		if(a.date <= b.date){
-		    return a.ordinal < b.ordinal ? -1 : 1;
-		} 
+		if(a.date < b.date){
+		    return -1
+		} else if (a.date == b.date){
+		    return a.ordinal < b.ordinal ? -1 : 1;		    
+		}
+		
 		return 1
 	    })
 

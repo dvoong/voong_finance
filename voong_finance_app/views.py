@@ -66,8 +66,10 @@ def create_transaction(request):
 
     transaction.refresh_from_db()
 
-    later_transactions = Transaction.objects.filter(user=user, date__gte=date, ordinal__gt=ordinal).order_by('date', 'ordinal')
+    later_transactions = Transaction.objects.filter(user=user, date__gte=date).order_by('date', 'ordinal')
     for t in later_transactions:
+        if t.date == transaction.date and t.ordinal <= transaction.ordinal:
+            continue
         end_balance += t.size
         t.balance = end_balance
         t.save()
