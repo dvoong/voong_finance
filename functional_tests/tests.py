@@ -122,6 +122,57 @@ class FunctionalTest(StaticLiveServerTestCase):
         self.assertEqual(transaction_description.get_attribute('innerHTML'), 'Phone Bill')
         self.assertEqual(transaction_size.get_attribute('innerHTML'), '-15')
         self.assertEqual(balance.get_attribute('innerHTML'), '85')
+
+        # user creates another transaction
+        # date is earlier than today
+        yesterday = today - datetime.timedelta(days=1)
+        date_input.send_keys('{:02}{:02}{}'.format(yesterday.day, yesterday.month, yesterday.year))        
+        Select(type_input).select_by_visible_text('Income')
+        description_input.send_keys('Salary')
+        size_input.send_keys('1000')
+        transaction_form.find_element_by_id('submit-button').click()
+
+        WebDriverWait(self.browser, timeout=2).until(lambda b: len(transaction_table.find_elements_by_css_selector('.transaction')) == 3)
+
+        transactions = transaction_table.find_elements_by_css_selector('.transaction')
+        transaction = transactions[0]
+        transaction_date = transaction.find_element_by_id('transaction-date')
+        transaction_type = transaction.find_element_by_id('transaction-type')
+        transaction_description = transaction.find_element_by_id('transaction-description')
+        transaction_size = transaction.find_element_by_id('transaction-size')
+        balance = transaction.find_element_by_id('balance')
+
+        self.assertEqual(transaction_date.get_attribute('innerHTML'), yesterday.isoformat())
+        self.assertEqual(transaction_type.get_attribute('innerHTML'), 'income')
+        self.assertEqual(transaction_description.get_attribute('innerHTML'), 'Salary')
+        self.assertEqual(transaction_size.get_attribute('innerHTML'), '1000')
+        self.assertEqual(balance.get_attribute('innerHTML'), '1000')
+
+        transaction = transactions[1]
+        transaction_date = transaction.find_element_by_id('transaction-date')
+        transaction_type = transaction.find_element_by_id('transaction-type')
+        transaction_description = transaction.find_element_by_id('transaction-description')
+        transaction_size = transaction.find_element_by_id('transaction-size')
+        balance = transaction.find_element_by_id('balance')
+
+        self.assertEqual(transaction_date.get_attribute('innerHTML'), today.isoformat())
+        self.assertEqual(transaction_type.get_attribute('innerHTML'), 'income')
+        self.assertEqual(transaction_description.get_attribute('innerHTML'), 'Description')
+        self.assertEqual(transaction_size.get_attribute('innerHTML'), '100')
+        self.assertEqual(balance.get_attribute('innerHTML'), '1100')
+
+        transaction = transactions[2]
+        transaction_date = transaction.find_element_by_id('transaction-date')
+        transaction_type = transaction.find_element_by_id('transaction-type')
+        transaction_description = transaction.find_element_by_id('transaction-description')
+        transaction_size = transaction.find_element_by_id('transaction-size')
+        balance = transaction.find_element_by_id('balance')
+
+        self.assertEqual(transaction_date.get_attribute('innerHTML'), today.isoformat())
+        self.assertEqual(transaction_type.get_attribute('innerHTML'), 'expense')
+        self.assertEqual(transaction_description.get_attribute('innerHTML'), 'Phone Bill')
+        self.assertEqual(transaction_size.get_attribute('innerHTML'), '15')
+        self.assertEqual(balance.get_attribute('innerHTML'), '1085')
         
 
 # Unit tests tell a developer that the code is doing things right; functional tests tell a developer that the code is doing the right things.

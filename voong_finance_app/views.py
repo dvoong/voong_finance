@@ -49,10 +49,10 @@ def create_transaction(request):
 
     previous_transaction = Transaction.objects.filter(user=user, date__lte=date).order_by('-date', '-ordinal')[:1]
     previous_transaction = previous_transaction[0] if len(previous_transaction) > 0 else None
-    balance = previous_transaction.balance if previous_transaction else 0
-    ordinal = len(Transaction.objects.filter(user=user, date=date))
-
+    start_balance = previous_transaction.balance if previous_transaction else 0
     transaction_size = transaction_size if transaction_type == 'income' else -1 * transaction_size
+    end_balance = start_balance + float(transaction_size)
+    ordinal = len(Transaction.objects.filter(user=user, date=date))
 
     transaction = Transaction.objects.create(
         user=user,
@@ -60,11 +60,17 @@ def create_transaction(request):
         type=transaction_type,
         description=description,
         size=transaction_size,
-        balance=balance + float(transaction_size),
+        balance=end_balance,
         ordinal=ordinal
     )
 
     transaction.refresh_from_db()
+
+    later_transactions = Transaction.objects.filter(user=user, date__gte=date, ordinal__gt=ordinal).order_by('date', 'ordinal')
+    for t in later_transactions:
+        end_balance += t.size
+        t.balance = end_balance
+        t.save()
     
     return JsonResponse({
         'date': transaction.date,
