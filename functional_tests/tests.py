@@ -57,7 +57,7 @@ class FunctionalTest(StaticLiveServerTestCase):
         self.assertEqual(self.browser.title, 'Home')
         self.assertEqual(self.browser.current_url, self.live_server_url + '/home')
         balance_chart = self.browser.find_element_by_id('balance-chart')
-        transaction_table = self.browser.find_element_by_id('transactions-table')
+        transactions_table = self.browser.find_element_by_id('transactions-table')
         transaction_form = self.browser.find_element_by_id('transaction-form')
 
         # user creates a new transaction
@@ -76,9 +76,9 @@ class FunctionalTest(StaticLiveServerTestCase):
 
         transaction_form.find_element_by_id('submit-button').click()
 
-        WebDriverWait(self.browser, timeout=2).until(lambda b: len(transaction_table.find_elements_by_css_selector('.transaction')) == 1)
+        WebDriverWait(self.browser, timeout=2).until(lambda b: len(transactions_table.find_elements_by_css_selector('.transaction')) == 1)
 
-        transactions = transaction_table.find_elements_by_css_selector('.transaction')
+        transactions = transactions_table.find_elements_by_css_selector('.transaction')
         self.assertEqual(len(transactions), 1)
         
         transaction_date = transactions[0].find_element_by_id('transaction-date')
@@ -106,8 +106,8 @@ class FunctionalTest(StaticLiveServerTestCase):
         size_input.send_keys('15')
         transaction_form.find_element_by_id('submit-button').click()
 
-        WebDriverWait(self.browser, timeout=2).until(lambda b: len(transaction_table.find_elements_by_css_selector('.transaction')) == 2)
-        transactions = transaction_table.find_elements_by_css_selector('.transaction')
+        WebDriverWait(self.browser, timeout=2).until(lambda b: len(transactions_table.find_elements_by_css_selector('.transaction')) == 2)
+        transactions = transactions_table.find_elements_by_css_selector('.transaction')
         self.assertEqual(len(transactions), 2)
 
         transaction = transactions[1]
@@ -132,10 +132,11 @@ class FunctionalTest(StaticLiveServerTestCase):
         size_input.send_keys('1000')
         transaction_form.find_element_by_id('submit-button').click()
 
-        WebDriverWait(self.browser, timeout=2).until(lambda b: len(transaction_table.find_elements_by_css_selector('.transaction')) == 3)
+        WebDriverWait(self.browser, timeout=2).until(lambda b: len(transactions_table.find_elements_by_css_selector('.transaction')) == 3)
 
+        transactions = transactions_table.find_elements_by_css_selector('.transaction')
+        
         # should be the new transaction
-        transactions = transaction_table.find_elements_by_css_selector('.transaction')
         transaction = transactions[0]
         transaction_date = transaction.find_element_by_id('transaction-date')
         transaction_type = transaction.find_element_by_id('transaction-type')
@@ -176,8 +177,56 @@ class FunctionalTest(StaticLiveServerTestCase):
         self.assertEqual(transaction_description.get_attribute('innerHTML'), 'Phone Bill')
         self.assertEqual(transaction_size.get_attribute('innerHTML'), '-15')
         self.assertEqual(balance.get_attribute('innerHTML'), '1085')
-        
 
+        # user reloads page - should see existing transactions already created
+        self.browser.refresh();        
+
+        transactions_table = self.browser.find_element_by_id('transactions-table')
+        transactions = transactions_table.find_elements_by_css_selector('.transaction')
+        self.assertEqual(len(transactions), 3)
+
+        # should be the salary transaction
+        transaction = transactions[0]
+        transaction_date = transaction.find_element_by_id('transaction-date')
+        transaction_type = transaction.find_element_by_id('transaction-type')
+        transaction_description = transaction.find_element_by_id('transaction-description')
+        transaction_size = transaction.find_element_by_id('transaction-size')
+        balance = transaction.find_element_by_id('balance')
+
+        self.assertEqual(transaction_date.get_attribute('innerHTML'), yesterday.isoformat())
+        self.assertEqual(transaction_type.get_attribute('innerHTML'), 'income')
+        self.assertEqual(transaction_description.get_attribute('innerHTML'), 'Salary')
+        self.assertEqual(transaction_size.get_attribute('innerHTML'), '1000')
+        self.assertEqual(balance.get_attribute('innerHTML'), '1000')
+
+        # should be the first transaction
+        transaction = transactions[1]
+        transaction_date = transaction.find_element_by_id('transaction-date')
+        transaction_type = transaction.find_element_by_id('transaction-type')
+        transaction_description = transaction.find_element_by_id('transaction-description')
+        transaction_size = transaction.find_element_by_id('transaction-size')
+        balance = transaction.find_element_by_id('balance')
+
+        self.assertEqual(transaction_date.get_attribute('innerHTML'), today.isoformat())
+        self.assertEqual(transaction_type.get_attribute('innerHTML'), 'income')
+        self.assertEqual(transaction_description.get_attribute('innerHTML'), 'Description')
+        self.assertEqual(transaction_size.get_attribute('innerHTML'), '100')
+        self.assertEqual(balance.get_attribute('innerHTML'), '1100')
+
+        # should be the phone bill transaction
+        transaction = transactions[2]
+        transaction_date = transaction.find_element_by_id('transaction-date')
+        transaction_type = transaction.find_element_by_id('transaction-type')
+        transaction_description = transaction.find_element_by_id('transaction-description')
+        transaction_size = transaction.find_element_by_id('transaction-size')
+        balance = transaction.find_element_by_id('balance')
+
+        self.assertEqual(transaction_date.get_attribute('innerHTML'), today.isoformat())
+        self.assertEqual(transaction_type.get_attribute('innerHTML'), 'expense')
+        self.assertEqual(transaction_description.get_attribute('innerHTML'), 'Phone Bill')
+        self.assertEqual(transaction_size.get_attribute('innerHTML'), '-15')
+        self.assertEqual(balance.get_attribute('innerHTML'), '1085')
+        
 # Unit tests tell a developer that the code is doing things right; functional tests tell a developer that the code is doing the right things.
 # import datetime, time
 # from django.test import TestCase

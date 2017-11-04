@@ -1,5 +1,56 @@
 console.log("home.js");
 
+$(document).ready(function(){
+    console.log('ready');
+    var transactions = $.get('/get-transactions')
+	.done(function(data, status, xhr){
+	    var that = this;
+	    var transactions = data.data;
+	    console.log(transactions);
+
+	    var transactions_table = d3.select('#transactions-table tbody');
+	    var selection = transactions_table.selectAll('tr.transaction');
+	    var selection = selection.data(transactions);
+	    var enter = selection.enter();
+
+	    var transaction = enter.append('tr')
+	    .attr('class', 'transaction')
+
+	    transaction.append('td')
+		.attr('id', 'transaction-date')
+		.html(function(d){
+		    return d.date;
+		});
+
+	    transaction.append('td')
+		.attr('id', 'transaction-type')
+		.html(function(d){
+		    return d.transaction_type;
+		});
+
+	    transaction.append('td')
+		.attr('id', 'transaction-description')
+		.html(function(d){
+		    return d.description;
+		});
+
+	    transaction.append('td')
+		.attr('id', 'transaction-size')
+		.html(function(d){
+		    return d.transaction_size;
+		});
+
+	    transaction.append('td')
+		.attr('id', 'balance')
+		.html(function(d){
+		    return d.balance;
+		});
+
+	    $(that).find('#description-input').val('');
+	    $(that).find('#size-input').val('');
+	});
+});
+
 $('#transaction-form').submit(function(e){
     console.log('submit form');
     e.preventDefault();
