@@ -134,6 +134,7 @@ class FunctionalTest(StaticLiveServerTestCase):
 
         WebDriverWait(self.browser, timeout=2).until(lambda b: len(transaction_table.find_elements_by_css_selector('.transaction')) == 3)
 
+        # should be the new transaction
         transactions = transaction_table.find_elements_by_css_selector('.transaction')
         transaction = transactions[0]
         transaction_date = transaction.find_element_by_id('transaction-date')
@@ -148,6 +149,7 @@ class FunctionalTest(StaticLiveServerTestCase):
         self.assertEqual(transaction_size.get_attribute('innerHTML'), '1000')
         self.assertEqual(balance.get_attribute('innerHTML'), '1000')
 
+        # should be the first transaction and should be updated
         transaction = transactions[1]
         transaction_date = transaction.find_element_by_id('transaction-date')
         transaction_type = transaction.find_element_by_id('transaction-type')
@@ -161,6 +163,7 @@ class FunctionalTest(StaticLiveServerTestCase):
         self.assertEqual(transaction_size.get_attribute('innerHTML'), '100')
         self.assertEqual(balance.get_attribute('innerHTML'), '1100')
 
+        # should be the second transaction
         transaction = transactions[2]
         transaction_date = transaction.find_element_by_id('transaction-date')
         transaction_type = transaction.find_element_by_id('transaction-type')
@@ -171,7 +174,7 @@ class FunctionalTest(StaticLiveServerTestCase):
         self.assertEqual(transaction_date.get_attribute('innerHTML'), today.isoformat())
         self.assertEqual(transaction_type.get_attribute('innerHTML'), 'expense')
         self.assertEqual(transaction_description.get_attribute('innerHTML'), 'Phone Bill')
-        self.assertEqual(transaction_size.get_attribute('innerHTML'), '15')
+        self.assertEqual(transaction_size.get_attribute('innerHTML'), '-15')
         self.assertEqual(balance.get_attribute('innerHTML'), '1085')
         
 

@@ -5,7 +5,7 @@ $('#transaction-form').submit(function(e){
     e.preventDefault();
 
     var that = this;
-
+    
     var args = $(this).serialize();
     $.post('create-transaction', $(this).serialize())
 	.done(function(data, status, xhr){
@@ -14,6 +14,15 @@ $('#transaction-form').submit(function(e){
 	    
 	    var transactions_table = d3.select('#transactions-table tbody');
 	    var selection = transactions_table.selectAll('tr.transaction');
+
+	    // update transactions that occur after this transaction date
+	    var transactions = d3.selectAll('#transactions-table tr.transaction');
+	    var post_transactions = transactions.filter(function(d){
+		return d.date > data.date;
+	    });
+	    post_transactions.each(function(d){
+		d['balance'] += data.transaction_size;
+	    })
 	    
 	    var transactions = selection.data();
 	    transactions.push(data);
